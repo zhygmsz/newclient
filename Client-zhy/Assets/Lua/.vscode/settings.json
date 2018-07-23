@@ -1,0 +1,40 @@
+{
+    "workbench.iconTheme": "vscode-icons",
+    "editor.formatOnPaste": false,
+    "luaide.luaOperatorCheck": true,
+    "luaide.luaFunArgCheck": true,
+    "luaide.changeTextCheck": true,
+    "luaide.scriptRoots":
+    [
+        "C:/Users/zhaohaoyang/Desktop/newclient/Client-zhy/Assets/Lua",
+        "C:/Users/zhaohaoyang/Desktop/newclient/Client-zhy/Assets/ToLua/Lua",
+    ],
+    "luaide.showOnLine": true,
+    "editor.snippetSuggestions": "top",
+    "editor.formatOnType": true,
+    "editor.renderIndentGuides": true,
+    "files.autoGuessEncoding": false,
+    "luaide.isShowDest": true,
+    "luaide.moduleFunNestingCheck": false,
+    "files.autoSave": "afterDelay",
+    "window.zoomLevel": 0,
+    "editor.fontSize": 16,
+    "editor.matchBrackets": true,
+    "editor.wrappingIndent": "indent",
+    "workbench.colorTheme": "Default High Contrast",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/*.meta" : true,
+        //"**/*.json" : true,
+        "**/*.html" : true
+    },
+    "extensions.ignoreRecommendations": true,
+    "extensions.autoUpdate": false,
+    "window.menuBarVisibility": "default",
+    "editor.fontFamily": "Consolas, 'Courier New', monospace",
+    "explorer.confirmDragAndDrop": false
+}
