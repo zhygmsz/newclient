@@ -117,8 +117,23 @@ function EventItem:UnRegister()
     UnRegister(self._firstIdx, self._secondIdx, self._index)
 end
 
+local EventList = class("EventList")
+function EventList:ctor()
+    self._list = {}
+end
+
+function EventList:Register(firstIdx, secondIdx, func, selfObj)
+    table.insert(self._list, EventItem.new(firstIdx, secondIdx, func, selfObj))
+end
+
+function EventList:UnRegisterAll()
+    for _, eventItem in ipairs(self._list) do
+        if eventItem then
+            eventItem:UnRegister()
+        end
+    end
+end
+
 EventMgr = {}
-EventMgr.Register = Register
-EventMgr.UnRegister = UnRegister
 EventMgr.Send = Send
-EventMgr.EventItem = EventItem
+EventMgr.EventList = EventList
