@@ -95,9 +95,30 @@ local function Send(first, second, ...)
             end
         end
     end
-end 
+end
+
+local EventItem = class("EventItem")
+function EventItem:ctor(firstIdx, secondIdx, func, selfObj)
+    self._firstIdx = firstIdx
+    self._secondIdx = secondIdx
+    self._func = func
+    self._selfObj = selfObj
+
+    self._index = -1
+
+    self:Register()
+end
+
+function EventItem:Register()
+    self._index = Register(self._firstIdx, self._secondIdx, self._func, self._selfObj)
+end
+
+function EventItem:UnRegister()
+    UnRegister(self._firstIdx, self._secondIdx, self._index)
+end
 
 EventMgr = {}
 EventMgr.Register = Register
 EventMgr.UnRegister = UnRegister
 EventMgr.Send = Send
+EventMgr.EventItem = EventItem

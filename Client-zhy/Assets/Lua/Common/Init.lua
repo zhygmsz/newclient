@@ -4,6 +4,7 @@ local function Init()
     require("Common/GameLog")
     require("Common/GameUtils")
     require("Common/List")
+    require("Common/Class")
     require("Common/EventMgr")
 end
 
