@@ -5,7 +5,7 @@ local GameLog = GameLog
 
 local function TryCatch(func, ...)
 	local ret, errmsg = xpcall(func, traceback, ...)
-	if errmsg then
+	if not ret then
         GameLog.LogError("call func error -> %s", errmsg)
 		return false
 	end
