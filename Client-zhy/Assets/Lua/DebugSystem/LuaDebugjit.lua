@@ -40,8 +40,7 @@ local function createSocket()
 	function _M.connect6(address, port, laddress, lport)
 		return socket.connect(address, port, laddress, lport, "inet6")
 	end
-	
-	
+
 	if(not _M.connect) then
 		function _M.connect(address, port, laddress, lport)
 			local sock, err = socket.tcp()
@@ -118,7 +117,7 @@ local function createSocket()
 					return 1
 				else return sock:send(chunk) end
 			end
-		}) 
+		})
 	end
 	
 	sinkt["keep-open"] = function(sock)
@@ -244,7 +243,7 @@ local function createJson()
 			else	-- An object, not an array
 				for i, j in pairs(v) do
 					if isEncodable(i) and isEncodable(j) then
-						table.insert(rval, "\"" .. json_private.encodeString(i) .. '":' .. json.encode(j))
+						table.insert(rval, "\"" .. json_private.encodeString(i) .. '\":' .. json.encode(j))
 					end
 				end
 			end
@@ -308,7 +307,6 @@ local function createJson()
 	-- Following a Python-like convention, I have prefixed all these 'PRIVATE'
 	-- functions with an underscore.
 	-----------------------------------------------------------------------------
-
 	--- Scans an array from JSON into a Lua object
 	-- startPos begins at the start of the array.
 	-- Returns the array and the next starting position
@@ -440,7 +438,6 @@ local function createJson()
 		return string.sub(k, 2)
 	end})
 	-- END SoniEx2
-
 	--- Scans a JSON string from the opening inverted comma or single quote to the
 	-- end of the string.
 	-- Returns the string extracted as a Lua string,
@@ -493,7 +490,7 @@ local function createJson()
 		table.insert(t, string.sub(j, j + 1))
 		assert(string.find(s, startChar, j + 1), "String decoding failed: missing closing " .. startChar .. " at position " .. j .. "(for string at position " .. startPos .. ")")
 		return table.concat(t, ""), j + 2
-	-- END SoniEx2
+		-- END SoniEx2
 	end
 	
 	--- Scans a JSON string skipping all whitespace from the current start position.
@@ -515,9 +512,8 @@ local function createJson()
 	-- This just involves back-quoting inverted commas, back-quotes and newlines, I think ;-)
 	-- @param s The string to return as a JSON encoded (i.e. backquoted string)
 	-- @return The string appropriately escaped.
-
 	local escapeList = {
-		["\""] = '\\"',
+		["\""] = '\\\"',
 		['\\'] = '\\\\',
 		['/'] = '\\/',
 		[''] = '\\b',
@@ -580,7 +576,7 @@ local debugger_print = print
 local debug_server = nil
 local breakInfoSocket = nil
 local json = createJson()
- LuaDebugger = {
+local LuaDebugger = {
 	fileMaps = {},
 	Run = true,  --表示正常运行只检测断点
 	StepIn = false,
@@ -596,10 +592,21 @@ local json = createJson()
 	stepNextFun = nil,
 	DebugLuaFie = "",
 	runLineCount = 0,
-	version="1.0.4"
-	
-
+	--分割字符串缓存
+	splitFilePaths = {},
+	version="1.0.7"
 }
+local debug_hook = nil
+local _resume = coroutine.resume
+coroutine.resume = function(co, ...)
+	if(LuaDebugger.isHook) then
+		if coroutine.status(co)~="dead" then
+			debug.sethook(co,debug_hook, "lrc")
+		end  
+    end
+    return _resume(co, ...)
+end
+
 LuaDebugger.event = {
 	S2C_SetBreakPoints = 1,
 	C2S_SetBreakPoints = 2,
@@ -628,6 +635,7 @@ LuaDebugger.event = {
 	C2S_DebugXpCall = 20,
 	S2C_DebugClose = 21
 }
+--@region print
 function print(...)
 	if(LuaDebugger.isProntToConsole == 1 or LuaDebugger.isProntToConsole == 3) then
 		debugger_print(...)
@@ -636,7 +644,7 @@ function print(...)
 		if(debug_server) then
 			local arg = {...}    --这里的...和{}符号中间需要有空格号，否则会出错  
 			local str = ""
-			if(#arg==0) then
+		 	if(#arg==0) then
 				arg = { "nil" }
 			end
 			for k, v in pairs(arg) do
@@ -659,7 +667,7 @@ function luaIdePrintWarn( ... )
 		if(debug_server) then
 			local arg = {...}    --这里的...和{}符号中间需要有空格号，否则会出错  
 			local str = ""
-				if(#arg==0) then
+			 	if(#arg==0) then
 					arg = { "nil" }
 				end
 			for k, v in pairs(arg) do
@@ -682,7 +690,7 @@ function luaIdePrintErr( ... )
 		if(debug_server) then
 			local arg = {...}    --这里的...和{}符号中间需要有空格号，否则会出错  
 			local str = ""
-				if(#arg==0) then
+			 	if(#arg==0) then
 					arg = { "nil" }
 				end
 			for k, v in pairs(arg) do
@@ -697,8 +705,101 @@ function luaIdePrintErr( ... )
 		end
 	end
 end
+--@endregion
+
+--@region 辅助方法
+local function debugger_lastIndex(str, p)
+    local startIndex = string.find(str, p, 1)
+    while startIndex do
+        local findstartIndex = string.find(str, p, startIndex + 1)
+        if (not findstartIndex) then
+            break
+        else
+            startIndex = findstartIndex
+        end
+    end
+    return startIndex
+end
+local function debugger_convertParentDir(dir)
+    local index, endindex = string.find(dir, "/%.%./")
+    if (index) then
+        local file1 = string.sub(dir, 1, index - 1)
+        local startIndex = debugger_lastIndex(file1, "/")
+        file1 = string.sub(file1, 1, startIndex - 1)
+        local file2 = string.sub(dir, endindex)
+        dir = file1 .. file2
+        dir = debugger_convertParentDir(dir)
+        return dir
+    else
+        return dir
+    end
+end
+
+local function debugger_getFilePathInfo(file)	
+
+	local fileName = nil
+    local dir  = nil
+	file = file:gsub("\\", "/")
+	file = file:gsub("//", "/")
+	file = file:gsub("/./", "/")
+
+	if file:find("@") == 1 then
+        file = file:sub(2)
+	end
+	local findex = file:find("%./")
+	if(findex == 1) then
+		file = file:sub(3)
+	end
+
+	file = debugger_convertParentDir(file)
+    local fileLength = string.len( file )
+    local suffixNames = {
+        ".lua",
+        ".txt.lua",
+        ".txt",
+        ".bytes"
+    }
+    table.sort( suffixNames,function(name1,name2) 
+        return string.len( name1 ) > string.len( name2 )
+    end )
+    local suffixLengs = {}
+    for i,suffixName in ipairs(suffixNames) do
+       table.insert( suffixLengs,string.len(suffixName))
+    end
+
+    local fileLength = string.len( file )
+    for i,suffix in ipairs(suffixNames) do
+        local suffixName = string.sub(file,fileLength-suffixLengs[i]+1)
+        if(suffixName == suffix) then
+            file = string.sub(file,1,fileLength-suffixLengs[i])
+            break
+        end
+    end
+    local fileNameStartIndex = debugger_lastIndex(file, "/")
+    if (fileNameStartIndex) then
+         fileName = string.sub(file, fileNameStartIndex + 1)
+      
+        dir = string.sub(file, 1, fileNameStartIndex)
+        file = dir .. fileName
+    else
+        fileNameStartIndex = debugger_lastIndex(file, "%.")
+        if(not fileNameStartIndex) then
+            fileName = file
+            dir = ""
+        else
+            dir = string.sub(file, 1, fileNameStartIndex)
+            dir = dir:gsub("%.", "/")
+           fileName = string.sub(file, fileNameStartIndex+1)
+           file = dir .. fileName
+        end
+	end
+
+	return file,dir,fileName
+end
+
+--@endregion
 ----=============================工具方法=============================================
-local debug_hook = nil
+
 local function debugger_strSplit(input, delimiter)
 	input = tostring(input)
 	delimiter = tostring(delimiter)
@@ -730,7 +831,7 @@ local function debugger_dump(value, desciption, nesting)
 	print("dump from: " .. debugger_strTrim(traceback[3]))
 	local function _dump(value, desciption, indent, nest, keylen)
 		desciption = desciption or "<var>"
-		spc = ""
+		local spc = ""
 		if type(keylen) == "number" then
 			spc = string.rep(" ", keylen - string.len(_v(desciption)))
 		end
@@ -776,14 +877,26 @@ local function debugger_dump(value, desciption, nesting)
 end
 
 local function debugger_setVarInfo(name, value)
-	local vt = type(value)
+	local vt = type(value)	
 	local valueStr = ""
+	
+	
 	if(vt ~= "table") then
-		valueStr = tostring(value)
-		valueStr = ZZBase64.encode(valueStr)
+			valueStr = tostring(value)
+			valueStr = ZZBase64.encode(valueStr) 
 	else
-		-- valueStr =  topointer(value)
-	end
+		if(LuaDebugger.isFoxGloryProject) then
+			valueStr =ZZBase64.encode("table") 
+		else
+			local status, msg = xpcall(function() 
+				valueStr = tostring(value)
+				valueStr =ZZBase64.encode(valueStr) 
+			end, function(error)
+				valueStr =ZZBase64.encode("table") 
+			end)
+		end
+	end		
+
 	local valueInfo = {
 		name = name,
 		valueType = vt,
@@ -796,7 +909,7 @@ local function debugger_getvalue(f)
 	local locals = {}
 	-- get locals
 	while true do
-		local name, value = debug.getlocal(f, i)
+		local name, value = debug.getlocal(f, i)	
 		if not name then break end
 		if(name ~= "(*temporary)") then
 			locals[name] = value
@@ -809,7 +922,11 @@ local function debugger_getvalue(f)
 	while func do -- check for func as it may be nil for tail calls
 		local name, value = debug.getupvalue(func, i)
 		if not name then break end
-		ups[name] = value
+		if(name == "_ENV") then
+			ups["_ENV_"] = value		
+		else
+			ups[name] = value
+		end
 		i = i + 1
 	end
 	return {locals = locals, ups = ups}
@@ -831,23 +948,17 @@ debugger_stackInfo = function(ignoreCount, event)
 			end
 			if(file == "=[C]") then
 				isadd = false
-				
 			end
 		end
 		if not source then
 			break;
 		end
 		if(isadd) then
-			local file = source.source
-			if file:find("@") == 1 then
-				file = file:sub(2);
-				if not file:find("/") then
-					file = file:gsub("%.", "/")
-				end
-			end
+
+			local fullName,dir,fileName = debugger_getFilePathInfo(source.source)
 			local info =
 			{
-				src = file,
+				src = fullName,
 				scoreName = source.name,
 				currentline = source.currentline,
 				linedefined = source.linedefined,
@@ -867,7 +978,8 @@ debugger_stackInfo = function(ignoreCount, event)
 		stack = stackInfo.stack,
 		vars = stackInfo.vars,
 		funcs = stackInfo.funcs,
-		event = event
+		event = event,
+		funcsLength = #stackInfo.funcs
 	}
 	return data
 end
@@ -883,8 +995,9 @@ local function debugger_receiveDebugBreakInfo()
 		else
 			print("当前为lua版本,请使用-----LuaDebug.lua-----进行调试!")
 		end
-		
 	end
+
+
 	if(breakInfoSocket) then
 		local msg, status = breakInfoSocket:receive()
 		if(msg) then
@@ -892,41 +1005,70 @@ local function debugger_receiveDebugBreakInfo()
 			if netData.event == LuaDebugger.event.S2C_SetBreakPoints then
 				debugger_setBreak(netData.data)
 			elseif netData.event == LuaDebugger.event.S2C_LoadLuaScript then
-				-- print("获取数据")
+			
 				debugger_exeLuaString(netData.data, false)
 			end
 		end
 	end
 end
 local function splitFilePath(path)
+	if(LuaDebugger.splitFilePaths[path]) then
+		return LuaDebugger.splitFilePaths[path]
+	end
 	local pos, arr = 0, {}
 	-- for each divider found
-	for st, sp in function() return string.find(path, '/', pos, true) end do
-		table.insert(arr, string.sub(path, pos, st - 1))
+	for st, sp in function() return string.find(path, '/', pos, true) end do		
+		local pathStr = string.sub(path, pos, st - 1)	
+		table.insert(arr, pathStr)
 		pos = sp + 1
 	end
-	table.insert(arr, string.sub(path, pos))
+	local pathStr = string.sub(path, pos)
+	table.insert(arr,pathStr )
+	LuaDebugger.splitFilePaths[path] = arr
 	return arr
 end
-debugger_setBreak = function(datas)
+debugger_setBreak = function(datas)	
 	local breakInfos = LuaDebugger.breakInfos
 	for i, data in ipairs(datas) do
+		data.fileName = string.lower( data.fileName)
+		data.serverPath = string.lower( data.serverPath )
 		local breakInfo = breakInfos[data.fileName]
 		if(not breakInfo) then
 			breakInfos[data.fileName] = {}
 			breakInfo = breakInfos[data.fileName]
 		end
-		if(not data.lines or # data.lines == 0) then
+		if(not data.breakDatas or # data.breakDatas == 0) then
 			breakInfo[data.serverPath] = nil
 		else
-			local lineInfos = {}
-			for li, line in ipairs(data.lines) do
-				lineInfos[line] = true
+			local fileBreakInfo =breakInfo[data.serverPath]
+			if(not fileBreakInfo) then
+				fileBreakInfo	= {
+					pathNames = splitFilePath(data.serverPath),
+					--命中次數判斷計數器
+					hitCounts ={}
+				}
+				breakInfo[data.serverPath] = fileBreakInfo
 			end
-			breakInfo[data.serverPath] = {
-				pathNames = splitFilePath(data.serverPath),
-				lines = lineInfos
-			}
+			local lineInfos = {}
+			for li, breakData in ipairs(data.breakDatas) do
+				lineInfos[breakData.line] = breakData
+				if(breakData.hitCondition and breakData.hitCondition ~= "") then
+					breakData.hitCondition = tonumber(breakData.hitCondition)
+				else
+					breakData.hitCondition = 0
+				end
+				if(not fileBreakInfo.hitCounts[breakData.line]) then
+					
+					fileBreakInfo.hitCounts[breakData.line] = 0
+				end 
+			end
+			fileBreakInfo.lines = lineInfos
+			--這裡添加命中次數判斷
+			for line,count in pairs(fileBreakInfo.hitCounts) do
+				if(not lineInfos[line]) then
+					fileBreakInfo.hitCounts[line] = nil
+				end
+			end			
 		end
 		local count = 0
 		for i, linesInfo in pairs(breakInfo) do
@@ -936,13 +1078,14 @@ debugger_setBreak = function(datas)
 			breakInfos[data.fileName] = nil
 		end
 	end
-	-- debugger_dump(breakInfos, "breakInfos", 6)
+	--debugger_dump(breakInfos, "breakInfos", 6)
 	--检查是否需要断点
 	local isHook = false
 	for k, v in pairs(breakInfos) do
 		isHook = true
 		break
 	end
+	
 	--这样做的原因是为了最大限度的使手机调试更加流畅 注意这里会连续的进行n次
 	if(isHook) then
 		if(not LuaDebugger.isHook) then
@@ -957,77 +1100,10 @@ debugger_setBreak = function(datas)
 		end
 		LuaDebugger.isHook = false
 	end
+	
 end
 local function debugger_checkFileIsBreak(fileName)
 	return LuaDebugger.breakInfos[fileName]
-end
-local function debugger_checkIsBreak(fileName, line)
-	local breakInfo = LuaDebugger.breakInfos[fileName]
-	if(breakInfo) then
-		local ischeck = false
-		for k, lineInfo in pairs(breakInfo) do
-			local lines = lineInfo.lines
-			if(lines and lines[line]) then
-				ischeck = true
-				break
-			end
-		end
-		if(not ischeck) then return end
-		--并且在断点中
-		local info = getinfo(3)
-		local source = info.source
-		source = source:gsub("\\", "/")
-		if source:find("@") == 1 then
-			source = source:sub(2);
-			if not source:find("/") then
-				source = source:gsub("%.", "/")
-			end
-		end
-		local index = source:find("%.lua")
-		if not index then
-			source = source .. ".lua"
-		end
-		local hitPathNames = splitFilePath(source)
-		local isHit = true
-		local hitCounts = {}
-		for k, lineInfo in pairs(breakInfo) do
-			local lines = lineInfo.lines
-			local pathNames = lineInfo.pathNames
-			if(lines and lines[line]) then
-				--判断路径
-				hitCounts[k] = 0
-				local hitPathNamesCount = # hitPathNames
-				local pathNamesCount = # pathNames
-				while(true) do
-					if(pathNames[pathNamesCount] ~= hitPathNames[hitPathNamesCount]) then
-						isHit = false
-						break
-					else
-						hitCounts[k] = hitCounts[k] + 1
-					end
-					pathNamesCount = pathNamesCount - 1
-					hitPathNamesCount = hitPathNamesCount - 1
-					if(pathNamesCount <= 0 or hitPathNamesCount <= 0) then
-						break;
-					end
-				end
-			end
-		end
-		local hitFieName = ""
-		local maxCount = 0
-		for k, v in pairs(hitCounts) do
-			if(v > maxCount) then
-				maxCount = v
-				hitFieName = k;
-			end
-		end
-		if(# hitPathNames == 1 or(# hitPathNames > 1 and maxCount > 1)) then
-			if(hitFieName ~= "") then
-				return hitFieName
-			end
-		end
-	end
-	return false
 end
 --=====================================断点信息 end ----------------------------------------------
 local controller_host = "192.168.1.102"
@@ -1039,6 +1115,36 @@ local function debugger_sendMsg(serverSocket, eventName, data)
 	}
 	local sendStr = json.encode(sendMsg)
 	serverSocket:send(sendStr .. "__debugger_k0204__")
+end
+function debugger_conditionStr(condition,vars,callBack) 
+	local function loadScript()
+		local currentTabble = {}
+	
+		local locals = vars[1].locals;
+		local ups = vars[1].ups
+		if(ups) then
+			for k, v in pairs(ups) do
+				currentTabble[k] = v
+			end
+		end
+		
+		if(locals) then
+			for k, v in pairs(locals) do
+				currentTabble[k] = v
+			end
+		end
+		setmetatable(currentTabble, {__index = _G})
+		local fun = loadstring("return ".. condition)
+		setfenv(fun, currentTabble)
+		return fun()
+	end
+	local status, msg = xpcall(loadScript, function(error)
+			print(error)
+	end)
+	if(status and msg) then
+		callBack()
+	end
+
 end
 --执行lua字符串
 debugger_exeLuaString = function(data, isBreakPoint)
@@ -1079,47 +1185,31 @@ debugger_exeLuaString = function(data, isBreakPoint)
 		debugger_sendMsg(debug_server, LuaDebugger.event.C2S_LoadLuaScript, {msg = "加载代码失败"})
 	end
 end
-local function getLuaFileName(str)
-	local pos = 0
-	local fileName = "";
-	-- for each divider found
-	for st, sp in function() return string.find(str, '/', pos, true) end do
-		pos = sp + 1
-	end
-	fileName = string.sub(str, pos)
+
+local function getSource(source)
+	source = string.lower( source )
+	if(LuaDebugger.pathCachePaths[source]) then
+		LuaDebugger.currentLineFile = LuaDebugger.pathCachePaths[source]
+		return LuaDebugger.pathCachePaths[source]
+	end	
+
+	local fullName,dir,fileName = debugger_getFilePathInfo(source)
+	LuaDebugger.currentLineFile = fullName
+	LuaDebugger.pathCachePaths[source] = fileName
+
 	return fileName;
 end
-local function getSource(source)
-	if(LuaDebugger.pathCachePaths[source]) then
-		return LuaDebugger.pathCachePaths[source]
-	end
-	local file = source
-	file = file:gsub("\\", "/")
-	if file:find("@") == 1 then
-		file = file:sub(2);
-		if not file:find("/") then
-			file = file:gsub("%.", "/")
-		end
-	end
-	local index = file:find("%.lua")
-	if not index then
-		file = file .. ".lua"
-	end
-	file = getLuaFileName(file)
-	LuaDebugger.pathCachePaths[source] = file
-	return file;
-end
-local function debugger_GeVarInfoBytUserData(server,var,variablesReference,debugSpeedIndex)
+local function debugger_GeVarInfoBytUserData(server,var)
 	local fileds = LuaDebugTool.getUserDataInfo(var)
 	
 	local varInfos = {}
-	if(tolua) then
-		local  luavars = tolua.getpeer(vars)
+	if(tolua and tolua.getpeer) then
+		local  luavars = tolua.getpeer(var)
 		if(luavars) then
 			for k, v in pairs(luavars) do
 				local vinfo = debugger_setVarInfo(k, v)
 				table.insert(varInfos, vinfo)
-			end
+			end			
 		end
 	end
 	
@@ -1130,30 +1220,297 @@ local function debugger_GeVarInfoBytUserData(server,var,variablesReference,debug
 			name = filed.name,
 			valueType = filed.valueType,
 			valueStr = ZZBase64.encode(filed.valueStr),
-			isValue = filed.isValue
+			isValue = filed.isValue,
+			csharp = true
 		}
 		
 		table.insert( varInfos,valueInfo)
 		
 	end
+	return varInfos
+	-- debugger_sendMsg(server, LuaDebugger.event.C2S_ReqVar, {
+	-- 		variablesReference = variablesReference,
+	-- 		debugSpeedIndex = debugSpeedIndex,
+	-- 		vars = varInfos,
+	-- 		isComplete = 1
+	-- 	})
+end	
+
+local function debugger_getValueByScript(value,script)
 	
-	debugger_sendMsg(server, LuaDebugger.event.C2S_ReqVar, {
-			variablesReference = variablesReference,
-			debugSpeedIndex = debugSpeedIndex,
-			vars = varInfos,
-			isComplete = 1
-		})
+
+	local val = nil	
+	local status, msg = xpcall(function() 
+		local fun = loadstring("return " ..script)
+		setfenv(fun, value)	
+		val = fun()	
+	end, function(error)
+		print(error,"====>")
+		val = nil
+	end)
+
+	return val
 end
+local function debugger_getVarByKeys(value,keys,index) 
+
+	local str = ""
+	for i=index,#keys do
+		
+		local key = keys[i]
+		
+		if(key == "[metatable]") then	
+		else
+			
+			if(i == index) then
+				if(string.find( key,"%.") ) then
+					if(str == "") then
+						i = index +1
+						value = value[key]
+					end
+					if(i >= #keys) then
+						return index,value
+					end
+
+					return debugger_getVarByKeys(value,keys,i)
+				else
+					str = key
+				end
+				
+			else
+				
+				if(string.find(key,"%[")) then
+					str = str..key
+				elseif(type(key) == "string") then
+					str = str.."[\""..key.."\"]"
+				else
+					str = str.."["..key.."]"
+				end
+			end
+			
+		end 
+	end	
+
+	local v = debugger_getValueByScript(value,str)
+
+	return #keys,v
+end
+--[[
+    @desc: 查找c# 值
+    author:k0204
+    time:2018-04-07 21:32:31
+    return
+]]
+local function debugger_getCSharpValue(value,searchIndex,keys)
+	local key = keys[searchIndex]
+	local val = LuaDebugTool.getCSharpValue(value,key)
+	if(val) then
+		--1最后一个 直接返回
+		if(searchIndex == #keys) then
+			return #keys,val
+		else
+			--2再次获得 如果没有找到那么 进行lua 层面查找
+			local vindex,val1 = debugger_getCSharpValue(val,searchIndex+1,keys)
+			if(not val1) then
+				--组建新的keys
+				local tempKeys = {}
+				for i=vindex,#keys do
+					table.insert( tempKeys,keys[i] )
+				end
+				local vindx,val1 = debugger_searchVarByKeys(value,searckKeys,1)
+				return vindx,val1
+			else
+				return vindex,val1
+			
+			end
+		end
+	else
+		--3最终这里返回  所以2 中 没有当val1 不为空的处理
+		return searchIndex,val
+	end
+end
+local function debugger_searchVarByKeys(value,keys,searckKeys)
+
+	local index,val = debugger_getVarByKeys(value,searckKeys,1)
+	
+	if(not LuaDebugTool) then
+		return index,val
+	end
+	if(val) then
+		if(index == #keys) then
+			return index,val
+		else
+			local searchStr = "";
+			--进行c# 值查找
+			local keysLength = #keys
+			local searchIndex =index+1 
+			local sindex,val = debugger_getCSharpValue(val,searchIndex,keys)
+			return sindex,val
+		end
+	else
+		--进行递减
+		local tempKeys = {}		
+		for i=1,#searckKeys-1 do
+			table.insert( tempKeys,keys[i] )
+		end
+		if(#tempKeys == 0) then
+			return #keys,nil
+		end
+		return debugger_searchVarByKeys(value,keys,tempKeys)
+	end
+end
+--[[
+    @desc: 获取metatable 信息
+    author:k0204
+    time:2018-04-06 20:27:12
+    return
+]]
+local function debugger_getmetatable(value,metatable,vinfos,server,variablesReference,debugSpeedIndex,metatables)
+	for i,mtable in ipairs(metatables) do
+		if(metatable == mtable)  then
+			return vinfos
+		end
+	end
+	table.insert( metatables,metatable)
+	for k,v in pairs(metatable) do
+		local val = nil		
+		if(type(k) == "string") then
+		
+			xpcall(function()
+				val = value[k]
+			end,function(error) 
+				val = nil
+			end)
+			if(val == nil) then
+				xpcall(function()
+					if(string.find( k,"__")) then
+						val = v
+					end
+				end,function(error) 
+					val = nil
+				end)
+			end
+		end	
+		if(val) then
+			local vinfo = debugger_setVarInfo(k, val)
+			table.insert( vinfos, vinfo)
+			if(#vinfos > 10) then
+				debugger_sendMsg(server,
+				LuaDebugger.event.C2S_ReqVar,
+				{
+					variablesReference = variablesReference,
+					debugSpeedIndex = debugSpeedIndex,
+					vars = vinfos,
+					isComplete = 0
+				})
+				vinfos = {}
+			end
+		end
+	end 
+	local m = getmetatable(metatable)
+	if(m) then
+		return debugger_getmetatable(value,m,vinfos,server,variablesReference,debugSpeedIndex,metatables)
+	else
+		return vinfos
+	end
+end
+local function debugger_sendTableField(luatable,vinfos,server,variablesReference,debugSpeedIndex,valueType) 
+	
+		if(valueType == "userdata") then
+			if(tolua and tolua.getpeer) then
+				luatable = tolua.getpeer(luatable);
+			else
+				return vinfos;	
+			end
+		end
+		if(luatable == nil) then return vinfos end
+
+		for k, v in pairs(luatable) do	
+
+			local vinfo = debugger_setVarInfo(k, v)
+			table.insert(vinfos, vinfo)
+			if(# vinfos > 10) then
+				debugger_sendMsg(server,
+				LuaDebugger.event.C2S_ReqVar,
+				{
+					variablesReference = variablesReference,
+					debugSpeedIndex = debugSpeedIndex,
+					vars = vinfos,
+					isComplete = 0
+				})
+				vinfos = {} 
+			end
+		end
+	
+
+	return vinfos
+end
+local function debugger_sendTableValues(value,server,variablesReference,debugSpeedIndex)
+	local vinfos = {}
+	local luatable = {}
+	local valueType = type(value)
+	local userDataInfos = {}
+	local m =nil
+	if(valueType == "userdata") then
+		if(tolua and tolua.getpeer) then	
+			m =getmetatable(value)
+			vinfos =	debugger_sendTableField(value,vinfos,server,variablesReference,debugSpeedIndex,valueType) 
+		end
+		if(LuaDebugTool) then
+			local varInfos = debugger_GeVarInfoBytUserData(server,value,variablesReference,debugSpeedIndex)
+		
+			for i,v in ipairs(varInfos) do
+				
+					if(v.valueType == "System.Byte[]" and value[v.name] and type(value[v.name]) == "string") then
+						local valueInfo = {
+							name = v.name,
+							valueType = "string",
+							valueStr = ZZBase64.encode(value[v.name])
+						}
+						table.insert( vinfos, valueInfo)
+					else
+						table.insert(vinfos, v)
+					end
+					if(# vinfos > 10) then
+						debugger_sendMsg(server,
+						LuaDebugger.event.C2S_ReqVar,
+						{
+							variablesReference = variablesReference,
+							debugSpeedIndex = debugSpeedIndex,
+							vars = vinfos,
+							isComplete = 0
+						})
+						vinfos = {}
+					end
+			end
+			m =getmetatable(value)
+		end
+	else
+		m =getmetatable(value)
+		vinfos = debugger_sendTableField(value,vinfos,server,variablesReference,debugSpeedIndex,valueType) 
+	end
+
+	if(m) then
+		vinfos = debugger_getmetatable(value,m,vinfos,server,variablesReference,debugSpeedIndex,{})
+	end 
+	debugger_sendMsg(server, LuaDebugger.event.C2S_ReqVar, {
+				variablesReference = variablesReference,
+				debugSpeedIndex = debugSpeedIndex,
+				vars = vinfos,
+				isComplete = 1
+	})
+end
+
 --获取lua 变量的方法
 local function debugger_getBreakVar(body, server)
 	local variablesReference = body.variablesReference
 	local debugSpeedIndex = body.debugSpeedIndex
 	local vinfos = {}
 	local function exe()
-		
 		local frameId = body.frameId;
 		local type_ = body.type;
 		local keys = body.keys;
+		
+		
 		--找到对应的var
 		local vars = nil
 		if(type_ == 1) then
@@ -1161,92 +1518,48 @@ local function debugger_getBreakVar(body, server)
 			vars = vars.locals
 		elseif(type_ == 2) then
 			vars = LuaDebugger.currentDebuggerData.vars[frameId + 1]
-			vars = vars.ups
+			vars = vars.ups	
 		elseif(type_ == 3) then
 			vars = _G
 		end
-		
-		--特殊处理下
-		for i, v in ipairs(keys) do
-			if type(v) == "string" then
-				local start_m = string.sub(v,1,1)
-				if(start_m == "[") then
-					local len = string.len( v )
-					local end_m = string.sub(v,len,len)
-					if(end_m == "]") then
-						v = string.sub(v,2,len-1);
-					end
-					vars = vars[v]
-				else
-					vars = vars[v]
-				end
-			else		
-				vars = vars[v]
-			end
-			if(type(vars) == "userdata" and tolua ~= nil and  LuaDebugTool == nil) then
-				vars = tolua.getpeer(vars)
-			end
-			if(vars == nil) then
-				break;
-			end
+		if(#keys == 0) then
+			debugger_sendTableValues(vars,server,variablesReference,debugSpeedIndex)
+			return
 		end
-		local varType = type(vars)
-		if(varType == "userdata" ) then
-			if(LuaDebugTool) then
-				debugger_GeVarInfoBytUserData(server,vars,variablesReference,debugSpeedIndex)
-				return;
-			elseif(tolua == nil) then
-					debugger_sendMsg(server, LuaDebugger.event.C2S_ReqVar, {
-						variablesReference = variablesReference,
-						debugSpeedIndex = debugSpeedIndex,
-						vars = vinfos,
-						isComplete = 1
-					})
-					return
-			end
-		end
+		local index,value = debugger_searchVarByKeys(vars,keys,keys)
+		if(value) then
 
-		local count = 0;
-		if(vars ~= nil) then
-			local function add_value(k,v)
-				local vinfo = debugger_setVarInfo(k, v)
-				table.insert(vinfos, vinfo)
-				if(# vinfos > 10) then
-					debugger_sendMsg(server,
-					LuaDebugger.event.C2S_ReqVar,
-					{
-						variablesReference = variablesReference,
-						debugSpeedIndex = debugSpeedIndex,
-						vars = vinfos,
-						isComplete = 0
-					})
-					vinfos = {}
+			local valueType = type(value)
+			if(valueType == "table" or valueType == "userdata") then
+				debugger_sendTableValues(value,server,variablesReference,debugSpeedIndex)
+			else
+				if(valueType == "function") then
+					value = tostring(value)
 				end
+				debugger_sendMsg(server, LuaDebugger.event.C2S_ReqVar, {
+					variablesReference = variablesReference,
+					debugSpeedIndex = debugSpeedIndex,
+					vars = ZZBase64.encode(value)  ,
+					isComplete = 1,
+					varType = valueType
+				})
 			end
-			for k, v in pairs(vars) do
-				if k == "_fields" then
-					for _k,_v in pairs(v) do
-						add_value(_k.name,vars[_k.name]);
-					end
-					add_value("MRID",vars["MRID"]);
-					add_value("GROUPID",vars["GROUPID"]);
-					add_value("UNITID",vars["UNITID"]);
-				else
-					add_value(k,v);
-				end
-			end
+
+		else
+			
+			debugger_sendMsg(server, LuaDebugger.event.C2S_ReqVar, {
+				variablesReference = variablesReference,
+				debugSpeedIndex = debugSpeedIndex,
+				vars = {} ,
+				isComplete = 1,
+				varType = "nil"
+			})
 		end
-		debugger_sendMsg(server, LuaDebugger.event.C2S_ReqVar, {
-			variablesReference = variablesReference,
-			debugSpeedIndex = debugSpeedIndex,
-			vars = vinfos,
-			isComplete = 1
-		})
 	end
 	xpcall(exe, function(error)
-		print("获取变量错误 错误消息-----------------")
-		print(error)
-		print(debug.traceback("", 2))
+		-- print("获取变量错误 错误消息-----------------")
+		-- print(error)
+		-- print(debug.traceback("", 2))
 		debugger_sendMsg(server,
 		LuaDebugger.event.C2S_ReqVar,
 		{
@@ -1256,7 +1569,7 @@ local function debugger_getBreakVar(body, server)
 				{
 					name ="error",
 					valueType = "string",
-					valueStr = ZZBase64.encode("无法获取属性值"),
+					valueStr = ZZBase64.encode("无法获取属性值:"..error.. "->"..debug.traceback("", 2)),
 					isValue = false
 				}
 			},
@@ -1269,6 +1582,7 @@ local function ResetDebugInfo()
 		LuaDebugger.StepIn = false
 		LuaDebugger.StepNext = false
 		LuaDebugger.StepOut = false
+
 end
 local function debugger_loop(server)
 	server = debug_server
@@ -1277,8 +1591,7 @@ local function debugger_loop(server)
 	local eval_env = {}
 	local arg
 	while true do
-		local line, status,tempaaa = server:receive()
-		
+		local line, status = server:receive()
 		if(status == "closed") then
 			debug.sethook()
 			coroutine.yield()
@@ -1290,9 +1603,8 @@ local function debugger_loop(server)
 			if(event == LuaDebugger.event.S2C_DebugClose) then
 				debug.sethook()
 				coroutine.yield()
-				
-			elseif event == LuaDebugger.event.S2C_SetBreakPoints then --设置断点信息
-				
+			elseif event == LuaDebugger.event.S2C_SetBreakPoints then
+				--设置断点信息
 				local function setB()
 					debugger_setBreak(body)
 				end
@@ -1303,10 +1615,11 @@ local function debugger_loop(server)
 			
 				LuaDebugger.runTimeType = body.runTimeType
 				LuaDebugger.isProntToConsole = body.isProntToConsole
-				
-				ResetDebugInfo();
+				LuaDebugger.isFoxGloryProject = body.isFoxGloryProject
+				ResetDebugInfo()
+				LuaDebugger.currentDebuggerData = nil
 				LuaDebugger.Run = true
-				
+				LuaDebugger.tempRunFlag = true
 				local data = coroutine.yield()
 				LuaDebugger.currentDebuggerData = data;
 				debugger_sendMsg(server, data.event, {
@@ -1320,8 +1633,6 @@ local function debugger_loop(server)
 				
 				ResetDebugInfo()
 				LuaDebugger.StepNext = true
-
-			
 				--设置当前文件名和当前行数
 				local data = coroutine.yield()
 				--重置调试信息
@@ -1360,13 +1671,44 @@ local function debugger_loop(server)
 end
 coro_debugger = coroutine.create(debugger_loop)
 debug_hook = function(event, line)
+
+	if(not LuaDebugger.isHook) then
+		return
+	end
+
+	if(LuaDebugger.Run) then
+		if(event == "line") then
+			local isCheck = false
+			for k, breakInfo in pairs(LuaDebugger.breakInfos) do
+				
+				for bk, linesInfo in pairs(breakInfo) do
+					
+					if(linesInfo.lines and linesInfo.lines[line]) then
+						isCheck = true
+						break
+					end
+				end
+				if(isCheck) then
+					break
+				end
+			end
+			 
+			if(not isCheck) then
+				return
+			end
+			
+		end
+	end
+	
+
 	local file = nil
 	if(event == "line") then
+		
 		local funs = nil
 		local funlength =0
 		if(LuaDebugger.currentDebuggerData) then
 			funs = LuaDebugger.currentDebuggerData.funcs
-			funlength = funs and #funs or 0
+			funlength = #funs
 		end
 		local stepInfo = getinfo(2)
 		local tempFunc = stepInfo.func
@@ -1376,6 +1718,87 @@ debug_hook = function(event, line)
 		if(funlength > 0 and funs[1] == tempFunc and LuaDebugger.currentLine ~= line) then
 			LuaDebugger.runLineCount = LuaDebugger.runLineCount+1
 		end
+		local breakInfo = LuaDebugger.breakInfos[file]
+		local breakData = nil
+		local ischeck = false
+		if(breakInfo) then
+			
+			for k, lineInfo in pairs(breakInfo) do
+				local lines = lineInfo.lines
+				if(lines and lines[line]) then
+					ischeck = true
+					break
+				end
+			end
+		end
+		local isHit = false
+		if( ischeck) then 
+		
+		--并且在断点中
+		local info = stepInfo
+		local source = string.lower( info.source )
+		local fullName,dir,fileName = debugger_getFilePathInfo(source)
+		local hitPathNames = splitFilePath(fullName)
+		
+		local hitCounts = {}
+		local debugHitCounts = nil
+		for k, lineInfo in pairs(breakInfo) do
+			
+			local lines = lineInfo.lines
+			local pathNames = lineInfo.pathNames
+			debugHitCounts = lineInfo.hitCounts
+			if(lines and lines[line]) then
+				breakData = lines[line]
+				--判断路径
+				hitCounts[k] = 0
+				local hitPathNamesCount = # hitPathNames
+				local pathNamesCount = # pathNames
+				while(true) do
+					if(pathNames[pathNamesCount] ~= hitPathNames[hitPathNamesCount]) then
+							
+						break
+					else
+						hitCounts[k] = hitCounts[k] + 1
+					end
+					pathNamesCount = pathNamesCount - 1
+					hitPathNamesCount = hitPathNamesCount - 1
+					if(pathNamesCount <= 0 or hitPathNamesCount <= 0) then
+						break;
+					end
+				end
+			else
+				breakData = nil
+			end
+		end	
+		if(breakData) then	
+			local hitFieName = ""
+			local maxCount = 0		
+			for k, v in pairs(hitCounts) do
+				if(v > maxCount) then
+					maxCount = v
+					hitFieName = k;
+				end
+			end		
+			if(# hitPathNames == 1 or(# hitPathNames > 1 and maxCount > 1)) then
+				if(hitFieName ~= "") then
+					
+					local hitCount = breakData.hitCondition
+					local clientHitCount = debugHitCounts[breakData.line]
+					clientHitCount = clientHitCount +1
+					debugHitCounts[breakData.line] = clientHitCount
+					if(funs  and funs[1] == tempFunc and LuaDebugger.runLineCount == 0) then
+						LuaDebugger.runLineCount = 0
+					elseif(LuaDebugger.tempRunFlag and LuaDebugger.currentLine == line) then
+						LuaDebugger.runLineCount = 0
+						LuaDebugger.tempRunFlag  = nil
+					elseif(clientHitCount >= hitCount) then
+						isHit = true
+					end	
+					
+				end
+			end
+		end
+	end
 		if(LuaDebugger.StepOut) then
 			if(funlength == 1) then
 				ResetDebugInfo();
@@ -1386,11 +1809,12 @@ debug_hook = function(event, line)
 					local data = debugger_stackInfo(3, LuaDebugger.event.C2S_StepInResponse)
 					-- print("StepIn 挂起")
 					--挂起等待调试器作出反应
-					coroutine.resume(coro_debugger, data)
+					_resume(coro_debugger, data)
 					return
 				end
 			end
 		end
+	
 		if(LuaDebugger.StepIn) then
 			if(funs[1] == tempFunc and LuaDebugger.runLineCount == 0) then
 				return
@@ -1398,58 +1822,67 @@ debug_hook = function(event, line)
 			local data = debugger_stackInfo(3, LuaDebugger.event.C2S_StepInResponse)
 			-- print("StepIn 挂起")
 			--挂起等待调试器作出反应
-			coroutine.resume(coro_debugger, data)
+			_resume(coro_debugger, data)
 			return
 		end
+		
 		if(LuaDebugger.StepNext  ) then
-			if(LuaDebugger.currentLine == line) then
-				return
-			end
+			local isNext = false
 			if(funs) then
-				if(funs[1] ~= tempFunc) then
-					--判断是否是和下一个fun 相同如果相同
-					if(funlength >1) then
-						if(funs[2] == tempFunc) then
-						else
+				for i,f in ipairs(funs) do
+					if(tempFunc == f) then
+						if(LuaDebugger.currentLine == line) then
 							return
 						end
-					else
-						return
+						isNext =true
+						break;
 					end
 				end
+			else
+				
+				isNext =true
 			end
-			local data = debugger_stackInfo(3, LuaDebugger.event.C2S_NextResponse)
-			LuaDebugger.runLineCount = 0
-			LuaDebugger.currentLine = line
-			--挂起等待调试器作出反应
-			coroutine.resume(coro_debugger, data)
-			return
-		end
-		local isHit = false
-		local sevent = nil
-		--断点判断
-		if(isHit == false and debugger_checkIsBreak(file, line)) then
-			if(funs  and funs[1] == tempFunc and LuaDebugger.runLineCount == 0) then
+			if(isNext) then
+				local data = debugger_stackInfo(3, LuaDebugger.event.C2S_NextResponse)
 				LuaDebugger.runLineCount = 0
+				LuaDebugger.currentLine = line
+				--挂起等待调试器作出反应
+				_resume(coro_debugger, data)
 				return
 			end
+		end
+		
+		local sevent = nil
+		
+
+		--断点判断
+		if(isHit) then
+			
+			
 			LuaDebugger.runLineCount = 0
 			LuaDebugger.currentLine = line
-			isHit = true
 			sevent = LuaDebugger.event.C2S_HITBreakPoint
 			--调用 coro_debugger 并传入 参数
 			local data = debugger_stackInfo(3, sevent)
 			--挂起等待调试器作出反应
-			coroutine.resume(coro_debugger, data)
+			if(breakData and breakData.condition) then
+				debugger_conditionStr(breakData.condition,data.vars,function() 
+					_resume(coro_debugger, data)
+				end)
+			else
+				--挂起等待调试器作出反应
+				_resume(coro_debugger, data)
+			end	
 		end
 	end
 end
+	
+
 local function debugger_xpcall()
 	--调用 coro_debugger 并传入 参数
-
 	local data = debugger_stackInfo(4, LuaDebugger.event.C2S_HITBreakPoint)
 	--挂起等待调试器作出反应
-	coroutine.resume(coro_debugger, data)
+	_resume(coro_debugger, data)
 end
 --调试开始
 local function start()
@@ -1458,7 +1891,8 @@ local function start()
 	print(controller_host)
 	print(controller_port)
 	
-	
+	local fullName,dirName,fileName = debugger_getFilePathInfo(getinfo(1).source)
+	LuaDebugger.DebugLuaFie = fileName
 	local server = socket.connect(controller_host, controller_port)
 	debug_server = server;
 	if server then
@@ -1475,6 +1909,7 @@ local function start()
 			debugger_sendMsg(server, LuaDebugger.event.C2S_SetSocketName, {
 				name = "mainSocket",
 				version = LuaDebugger.version
+
 			})
 			xpcall(function()
 				sethook(debug_hook, "lrc")
@@ -1489,20 +1924,13 @@ local function start()
 				end
 				
 			end
-			coroutine.resume(coro_debugger, server)
+			_resume(coro_debugger, server)
 		end
 	end
 end
 function StartDebug(host, port)
 	
-	
-	LuaDebugger.DebugLuaFie = getLuaFileName(getinfo(1).source)
-	local index = LuaDebugger.DebugLuaFie:find("%.lua")
-		if  index then
-			local fileNameLength = string.len(LuaDebugger.DebugLuaFie)
-			LuaDebugger.DebugLuaFie = LuaDebugger.DebugLuaFie:sub(1,fileNameLength-4)
-			
-		end
+
 	if(not host) then
 		print("error host nil")
 	end
@@ -1523,6 +1951,7 @@ function StartDebug(host, port)
 	end)
 	return debugger_receiveDebugBreakInfo, debugger_xpcall
 end
+
 
 
 --base64
@@ -1668,4 +2097,8 @@ function ZZBase64.__decodeLeft2(res, index, text, len)
     num = math.floor(num / 16)
     res[index] = string.char(num)
 end
+
+
+
+
 return StartDebug
