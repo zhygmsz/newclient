@@ -8,7 +8,7 @@ using UnityEngine;
 public class GameStart : MonoBehaviour
 {
     private GameObject mLuaManagerObj;
-    private LuaManager mLuaMgr;
+    private LuaMgr mLuaMgr;
 
     private void Awake()
     {
@@ -16,7 +16,7 @@ public class GameStart : MonoBehaviour
 
         mLuaManagerObj = Utils.NewGameObject(transform, true);
         mLuaManagerObj.name = "LuaManager";
-        mLuaMgr = mLuaManagerObj.AddComponent<LuaManager>();
+        mLuaMgr = mLuaManagerObj.AddComponent<LuaMgr>();
     }
 
     private void Start()

@@ -3,7 +3,7 @@ using System.Collections;
 using LuaInterface;
 using System;
 
-public class LuaManager : MonoBehaviour
+public class LuaMgr : MonoBehaviour
 {
     private LuaState lua;
     private LuaLooper loop = null;
