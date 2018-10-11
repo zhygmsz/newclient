@@ -1,10 +1,10 @@
-local M = {}
+module("DebugHelper", package.seeall)
 
-function M.Init(host, port)
-    M.StartLuaDebugger(host, port)
+function Init(host, port)
+    StartLuaDebugger(host, port)
 end
 
-function M.StartLuaDebugger(host, port)
+function StartLuaDebugger(host, port)
     local DEBUGGER_FILE = "LuaDebug"
     if jit then
         DEBUGGER_FILE = "LuaDebugjit"
@@ -13,5 +13,4 @@ function M.StartLuaDebugger(host, port)
     require("DebugSystem/" .. DEBUGGER_FILE)(host or "localhost", port or 7003)
 end
 
---全局
-DebugHelper = M
+return DebugHelper

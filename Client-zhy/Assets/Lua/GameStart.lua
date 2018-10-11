@@ -1,13 +1,14 @@
 local function InitGame()
-	require("GameInit")
+	require("GameInit").Init()
 end
 
 local function InitDebug()
-	require("DebugSystem/DebugHelper")
-	DebugHelper.Init()
+	require("DebugSystem.DebugHelper").Init()
 end
 
---lua控制权根节点
+--[[
+    @desc: lua逻辑根节点，由C#发起调用
+]]
 function Start()
 	print("GameStart.Start -> ")
 

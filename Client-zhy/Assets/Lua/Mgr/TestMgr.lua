@@ -10,10 +10,10 @@ local function OnRemoveEquip()
     GameLog.LogError("TestMgr.OnRemoveEquip ->")
 end
 
-local function Init()
+function Init()
     mEventList = EventMgr.EventList.new()
     mEventList:Register(GameConfig.Event_F_Equip, GameConfig.Event_S_Equip_Add, OnAddEquip)
     mEventList:Register(GameConfig.Event_F_Equip, GameConfig.Event_S_Equip_Remove, OnRemoveEquip)
 end
 
-Init()
+return TestMgr
