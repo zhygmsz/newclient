@@ -4,8 +4,20 @@ using UnityEngine;
 
 public class UIEvent : MonoBehaviour
 {
-    public int mUIID;
-    public Collider mCollider;
+    private int mUIID;
+    private Collider mCollider;
+
+	public int UIID
+	{
+		get
+		{
+            return mUIID;
+        }
+		set
+		{
+            mUIID = value;
+        }
+	}
 
 	void Awake()
 	{
