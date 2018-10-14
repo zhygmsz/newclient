@@ -1,6 +1,8 @@
 module("AllUI", package.seeall)
 
 local mUIDataDic = {}
+AllUI.UIData = mUIDataDic
+local mUIDataDicForCS = {}
 
 local mUIID = 0
 local function GenUIID()
@@ -17,10 +19,15 @@ function RegisterUI(path)
     local luaScript = require(path)
     local uiData = {}
     local uiId = GenUIID()
+    --uiID主要用于和C#建立对应关系，因为C#层的UI字典key为uiID
+    --而C#层使用的uiID也正是来自这个方法里
     uiData.uiId = uiId
+    --在Lua层,UI字典的key为uiName
     uiData.uiName = uiName
     uiData.luaScript = luaScript
-    mUIDataDic[uiId] = uiData
+    --为了能AllUI.UIData.uiName的形式获取UI数据
+    mUIDataDic[uiName] = uiData
+    mUIDataDicForCS[uiId] = uiData
 end
 
 function InitModule()
@@ -31,7 +38,7 @@ function GetUIData(uiId)
     if not uiId then
         return nil
     end
-    return mUIDataDic[uiId]
+    return mUIDataDicForCS[uiId]
 end
 
 return AllUI

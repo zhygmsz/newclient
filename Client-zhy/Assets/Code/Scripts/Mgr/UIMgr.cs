@@ -81,69 +81,126 @@ public class UIMgr
 	//lua层再根据uiid派发给各个UI对应的lua脚本
 	static public void OnCreate(UIFrame frame)
 	{
-
-	}
+        mOnCreate.BeginPCall();
+        mOnCreate.Push(frame.UIID);
+        mOnCreate.Push(frame);
+        mOnCreate.PCall();
+        mOnCreate.EndPCall();
+    }
 
 	static public void OnEnable(UIFrame frame)
 	{
-
-	}
+        mOnEnable.BeginPCall();
+        mOnEnable.Push(frame.UIID);
+        mOnEnable.Push(frame);
+        mOnEnable.PCall();
+        mOnEnable.EndPCall();
+    }
 
 	static public void OnDisable(UIFrame frame)
 	{
-
-	}
+        mOnDisable.BeginPCall();
+        mOnDisable.Push(frame.UIID);
+        mOnDisable.Push(frame);
+        mOnDisable.PCall();
+        mOnDisable.EndPCall();
+    }
 
 	static public void OnDestroy(UIFrame frame)
 	{
-
-	}
+        mOnDestroy.BeginPCall();
+        mOnDestroy.Push(frame.UIID);
+        mOnDestroy.Push(frame);
+        mOnDestroy.PCall();
+        mOnDestroy.EndPCall();
+    }
 
 	//下面的方法是各种UI事件方法，由UIEvent调用，直接传递到lua层
 	//在UIMgr里接受lua注册进来的各种UI事件的方法，不同的界面以uiid来区分
 	//在lua层根据uiid再做一次派发，直到每个UI事件传递到UI对应的lua脚本里
-	static public void OnClick(int uiID)
+	static public void OnClick(int uiID, int eventID)
 	{
+        mOnClick.BeginPCall();
+        mOnClick.Push(uiID);
+        mOnClick.Push(eventID);
+        mOnClick.PCall();
+        mOnClick.EndPCall();		
+    }
 
-	}
-
-	static public void OnPress(int uiID, bool isPressed)
+	static public void OnPress(int uiID, bool isPressed, int eventID)
 	{
-
-	}
-
-    static public void OnSelect(int uiID, bool selected)
-    {
-
+        mOnPress.BeginPCall();
+        mOnPress.Push(uiID);
+        mOnPress.Push(isPressed);
+        mOnPress.Push(eventID);
+        mOnPress.PCall();
+        mOnPress.EndPCall();
     }
 
-    static public void OnDoubleClick(int uiID)
+    static public void OnSelect(int uiID, bool selected, int eventID)
     {
-
+        mOnSelect.BeginPCall();
+        mOnSelect.Push(uiID);
+        mOnSelect.Push(selected);
+        mOnSelect.Push(eventID);
+        mOnSelect.PCall();
+        mOnSelect.EndPCall();
     }
 
-    static public void OnDragStart(int uiID)
+    static public void OnDoubleClick(int uiID, int eventID)
     {
-
+        mOnDoubleClick.BeginPCall();
+        mOnDoubleClick.Push(uiID);
+        mOnDoubleClick.Push(eventID);
+        mOnDoubleClick.PCall();
+        mOnDoubleClick.EndPCall();
     }
 
-	static public void OnDrag(int uiID, Vector2 delta)
+    static public void OnDragStart(int uiID, int eventID)
+    {
+        mOnDragStart.BeginPCall();
+        mOnDragStart.Push(uiID);
+        mOnDragStart.Push(eventID);
+        mOnDragStart.PCall();
+        mOnDragStart.EndPCall();
+    }
+
+	static public void OnDrag(int uiID, Vector2 delta, int eventID)
 	{
-		
-	}
-
-    static public void OnDragEnd(int uiID)
-    {
-
+        mOnDrag.BeginPCall();
+        mOnDrag.Push(uiID);
+        mOnDrag.Push(delta);
+        mOnDrag.Push(eventID);
+        mOnDrag.PCall();
+        mOnDrag.EndPCall();
     }
 
-    static public void OnDragOver(int uiID, GameObject obj)
+    static public void OnDragEnd(int uiID, int eventID)
     {
-
+        mOnDragEnd.BeginPCall();
+        mOnDragEnd.Push(uiID);
+        mOnDragEnd.Push(eventID);
+        mOnDragEnd.PCall();
+        mOnDragEnd.EndPCall();
     }
 
-    static public void OnDragOut(int uiID, GameObject obj)
+    static public void OnDragOver(int uiID, GameObject obj, int eventID)
     {
+        mOnDragOver.BeginPCall();
+        mOnDragOver.Push(uiID);
+        mOnDragOver.Push(obj);
+        mOnDragOver.Push(eventID);
+        mOnDragOver.PCall();
+        mOnDragOver.EndPCall();
+    }
 
+    static public void OnDragOut(int uiID, GameObject obj, int eventID)
+    {
+        mOnDragOut.BeginPCall();
+        mOnDragOut.Push(uiID);
+        mOnDragOut.Push(obj);
+        mOnDragOut.Push(eventID);
+        mOnDragOut.PCall();
+        mOnDragOut.EndPCall();
     }
 }

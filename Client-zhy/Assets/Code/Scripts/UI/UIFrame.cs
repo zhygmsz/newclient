@@ -16,7 +16,7 @@ public class UIFrame
 
 
     private int mUIID;
-    private string mUIPath;
+    private string mUIName;
 
     private Transform mCachedTrs;
     private GameObject mCachedGo;
@@ -29,16 +29,17 @@ public class UIFrame
         }
     }
 
-    public UIFrame(int id, string path)
+    public UIFrame(int uiID, string uiName)
     {
-        mUIID = id;
-        mUIPath = path;
+        mUIID = uiID;
+        mUIName = uiName;
     }
 
     public void OnShow()
     {
         //加载UI对应的资源，以后需要加载回调
         //给mCachedTrs,mCachedGo赋值
+        //string uiPath = 
     }
 
     public void OnUnShow()
