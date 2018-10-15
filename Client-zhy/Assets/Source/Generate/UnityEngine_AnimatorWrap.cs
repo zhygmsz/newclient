@@ -1476,7 +1476,7 @@ public class UnityEngine_AnimatorWrap
 			UnityEngine.Animator obj = (UnityEngine.Animator)ToLua.CheckObject<UnityEngine.Animator>(L, 1);
 			UnityEngine.HumanBodyBones arg0 = (UnityEngine.HumanBodyBones)ToLua.CheckObject(L, 2, typeof(UnityEngine.HumanBodyBones));
 			UnityEngine.Transform o = obj.GetBoneTransform(arg0);
-			ToLua.Push(L, o);
+			ToLua.PushSealed(L, o);
 			return 1;
 		}
 		catch (Exception e)

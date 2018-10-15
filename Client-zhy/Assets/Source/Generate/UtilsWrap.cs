@@ -46,7 +46,7 @@ public class UtilsWrap
 		try
 		{
 			ToLua.CheckArgsCount(L, 2);
-			UnityEngine.Transform arg0 = (UnityEngine.Transform)ToLua.CheckObject<UnityEngine.Transform>(L, 1);
+			UnityEngine.Transform arg0 = (UnityEngine.Transform)ToLua.CheckObject(L, 1, typeof(UnityEngine.Transform));
 			bool arg1 = LuaDLL.luaL_checkboolean(L, 2);
 			UnityEngine.GameObject o = Utils.NewGameObject(arg0, arg1);
 			ToLua.PushSealed(L, o);
