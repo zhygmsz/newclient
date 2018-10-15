@@ -1,16 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
-public class EditorResourceLoader : MonoBehaviour {
+namespace GameCore.Res
+{
+	//编辑器模式下资源加载器,使用AssetDatabase
+    public class EditorResourceLoader
+    {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    }
 }

@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ResourceMgr : MonoBehaviour {
+namespace GameCore.Res
+{
+	//根据平台(Editor or Bundle)，创建一个资源加载器
+	//这里使用的加载器均依赖于ResourceLoader接口，屏蔽不同平台之间的差异
 
-	// Use this for initialization
-	void Start () {
+    public class ResourceMgr
+    {
 		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    }
 }

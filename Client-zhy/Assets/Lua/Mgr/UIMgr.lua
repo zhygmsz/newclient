@@ -3,26 +3,76 @@ module("UIMgr", package.seeall)
 --C#层的UIMgr
 local mUIMgr = GameCore.UIMgr
 
+local function DoInvoke(funcName)
+    -- body
+end
+
 --以下是UI状态事件方法
 local function OnCreate(uiID, frame)
-    
+    local uiData = AllUI.GetUIData(uiID)
+    if uiData then
+        if uiData.luaScript and uiData.luaScript.OnCreate then
+            uiData.luaScript.OnCreate(frame)
+        end
+    else
+        --没找到uidata，提示
+    end
 end
 
 local function OnEnable(uiID, frame)
+    local uiData = AllUI.GetUIData(uiID)
+    if uiData then
+        if uiData.luaScript and uiData.luaScript.OnEnable then
+            uiData.luaScript.OnEnable(frame)
+        end
+    else
+        --
+    end
 end
 
 local function OnDisable(uiID, frame)
-    
+    local uiData = AllUI.GetUIData(uiID)
+    if uiData then
+        if uiData.luaScript and uiData.luaScript.OnDisable then
+            uiData.luaScript.OnDisable(frame)
+        end
+    else
+        --
+    end
 end
 
 local function OnDestroy(uiID, frame)
+    local uiData = AllUI.GetUIData(uiID)
+    if uiData then
+        if uiData.luaScript and uiData.luaScript.OnDestroy then
+            uiData.luaScript.OnDestroy(frame)
+        end
+    else
+        --
+    end
 end
 
 --以下是NGUI事件方法
 local function OnClick(uiID, eventID)
+    local uiData = AllUI.GetUIData(uiID)
+    if uiData then
+        if uiData.luaScript and uiData.luaScript.OnClick then
+            uiData.luaScript.OnClick(eventID)
+        end
+    else
+        --
+    end
 end
 
 local function OnPress(uiID, isPressed, eventID)
+    local uiData = AllUI.GetUIData(uiID)
+    if uiData then
+        if uiData.luaScript and uiData.luaScript.OnPress then
+            uiData.luaScript.OnPress(isPressed, eventID)
+        end
+    else
+
+    end
 end
 
 local function OnSelect(uiID, selected, eventID)

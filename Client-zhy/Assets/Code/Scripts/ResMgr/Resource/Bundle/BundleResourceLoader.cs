@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BundleResourceLoader : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
+namespace GameCore.Res
+{
+	//Bundle模式下资源加载器，还不知道该如何下手
+    public class BundleResourceLoader
+    {
 		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    }
 }
