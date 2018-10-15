@@ -61,6 +61,7 @@ namespace GameCore
         //UI关联的资源处理细节放到UIFrame里做
         static public void ShowUI(int uiID, string uiName)
         {
+            Utils.Log("----------------------------ShowUI");
             UIFrame frame = null;
             if (!mUIFrameDic.TryGetValue(uiID, out frame))
             {

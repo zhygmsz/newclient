@@ -20,9 +20,6 @@ function Start()
 end
 
 function Test()
-	EventMgr.Send(GameConfig.Event_F_Equip, GameConfig.Event_S_Equip_Add)
-
-	--
-	local bIdx, eIdx = string.find("[zhy]", "[zhy]")
-	local val = 1
+	--打开第一个UI，测试UI框架
+	UIMgr.ShowUI(AllUI.UI_Test)
 end

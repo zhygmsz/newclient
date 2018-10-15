@@ -39,9 +39,10 @@ namespace GameCore
 
         public void OnShow()
         {
-            //加载UI对应的资源，以后需要加载回调
+            //先同步加载UI，并实例化
             //给mCachedTrs,mCachedGo赋值
-            //string uiPath = 
+            string uiPath = AppConst.UIPrefabPath + mUIName;
+
         }
 
         public void OnUnShow()

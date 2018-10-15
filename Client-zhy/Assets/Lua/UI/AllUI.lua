@@ -14,7 +14,8 @@ end
 ]]
 function RegisterUI(path)
     local uiName = string.match(path, ".+/(.+)")
-    local luaScript = require(path)
+    require(path)
+    local luaScript = package.loaded[uiName]
     local uiData = {}
     local uiID = GenUIID()
     --uiID主要用于和C#建立对应关系，因为C#层的UI字典key为uiID
@@ -50,6 +51,11 @@ function CheckIsValid(uiData)
     else
         return false
     end
+end
+
+function Init()
+    --一次性注册所有的UI
+    require("UI.Define.TestDefine")
 end
 
 return AllUI

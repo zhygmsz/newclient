@@ -10,6 +10,8 @@ local function InitCommon()
     require("Common/List")
     require("Common/Class")
     require("Common/EventMgr")
+
+    require("UI.AllUI").Init()
 end
 
 --[[
