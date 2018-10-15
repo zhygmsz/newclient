@@ -139,6 +139,12 @@ public static class CustomSettings
         _GT(typeof(Resources)),     
         _GT(typeof(LuaProfiler)),
 
+        //业务逻辑
+        //UI框架
+        _GT(typeof(GameCore.UIMgr)),
+        _GT(typeof(GameCore.UIFrame)),
+        _GT(typeof(GameCore.UIEvent)),
+
         //调试
         _GT(typeof(LuaValueInfo)),
         _GT(typeof(LuaDebugTool)),
@@ -181,7 +187,7 @@ public static class CustomSettings
     //ngui优化，下面的类没有派生类，可以作为sealed class
     public static List<Type> sealedList = new List<Type>()
     {
-        /*typeof(Transform),
+        typeof(Transform),
         typeof(UIRoot),
         typeof(UICamera),
         typeof(UIViewport),
@@ -194,7 +200,7 @@ public static class CustomSettings
         typeof(UISprite),
         typeof(UIGrid),
         typeof(UITable),
-        typeof(UIWrapGrid),
+        //typeof(UIWrapGrid),
         typeof(UIInput),
         typeof(UIScrollView),
         typeof(UIEventListener),
@@ -216,7 +222,7 @@ public static class CustomSettings
         typeof(TweenHeight),
         typeof(TypewriterEffect),
         typeof(UIToggle),
-        typeof(Localization),*/
+        typeof(Localization),
     };
 
     public static BindType _GT(Type t)
