@@ -21,4 +21,8 @@ end
 
 function Test()
 	EventMgr.Send(GameConfig.Event_F_Equip, GameConfig.Event_S_Equip_Add)
+
+	--
+	local bIdx, eIdx = string.find("[zhy]", "[zhy]")
+	local val = 1
 end

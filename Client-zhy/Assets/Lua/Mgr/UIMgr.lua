@@ -1,61 +1,79 @@
 module("UIMgr", package.seeall)
 
-function Init()
-    
-end
-
---UI打开的处理过程为异步后，需要再传递一个回调
---这个回调由统一的地方管理，业务逻辑层只需用uiID和一个lua方法即可注册
-function ShowUI(uiID)
-    
-end
-
-function UnShowUI(uiID)
-    
-end
+--C#层的UIMgr
+local mUIMgr = GameCore.UIMgr
 
 --以下是UI状态事件方法
-function OnCreate(uiID, frame)
+local function OnCreate(uiID, frame)
     
 end
 
-function OnEnable(uiID, frame)
+local function OnEnable(uiID, frame)
 end
 
-function OnDisable(uiID, frame)
+local function OnDisable(uiID, frame)
     
 end
 
-function OnDestroy(uiID, frame)
+local function OnDestroy(uiID, frame)
 end
 
 --以下是NGUI事件方法
-function OnClick(uiID, eventID)
+local function OnClick(uiID, eventID)
 end
 
-function OnPress(uiID, isPressed, eventID)
+local function OnPress(uiID, isPressed, eventID)
 end
 
-function OnSelect(uiID, selected, eventID)
+local function OnSelect(uiID, selected, eventID)
 end
 
-function OnDoubleClick(uiID, eventID)
+local function OnDoubleClick(uiID, eventID)
 end
 
-function OnDragStart(uiID, eventID)
+local function OnDragStart(uiID, eventID)
 end
 
-function OnDrag(uiID, delta, eventID)
+local function OnDrag(uiID, delta, eventID)
 end
 
-function OnDragEnd(uiID, eventID)
+local function OnDragEnd(uiID, eventID)
 end
 
-function OnDragOver(uiID, obj, eventID)
+local function OnDragOver(uiID, obj, eventID)
 end
 
-function OnDragOut(uiID, obj, eventID)
+local function OnDragOut(uiID, obj, eventID)
     
+end
+
+function Init()
+    --可能还需要UIRoot作为根节点，放置新创建的UI
+    mUIMgr.Init(OnCreate, OnEnable, OnDisable, OnDestroy,
+            OnClick, OnPress, OnSelect,
+            OnDoubleClick,
+            OnDragStart, OnDrag, OnDragEnd, OnDragOver, OnDragOut)
+
+    --
+
+end
+
+--UI打开的处理过程为异步后，需要再传递一个回调
+--这个回调在lua层由统一的地方管理，业务逻辑层只需用uiID和一个lua方法即可注册
+function ShowUI(uiData)
+    if AllUI.CheckIsValid(uiData) then
+        mUIMgr.ShowUI(uiData.uiID, uiData.uiName)
+    else
+        --uiData无效，提示
+    end
+end
+
+function UnShowUI(uiData)
+    if AllUI.CheckIsValid(uiData) then
+        mUIMgr.UnShowUI(uiData.uiID)
+    else
+        --uiData无效，提示
+    end
 end
 
 return UIMgr
