@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 namespace GameCore
 {
@@ -41,8 +42,17 @@ namespace GameCore
         {
             //先同步加载UI，并实例化
             //给mCachedTrs,mCachedGo赋值
-            string uiPath = AppConst.UIPrefabPath + mUIName;
+            string uiPath = AppConst.UIPrefabPath + mUIName + ".prefab";
+            GameObject obj = AssetDatabase.LoadAssetAtPath(uiPath, typeof(GameObject)) as GameObject;
+            GameObject go = GameObject.Instantiate<GameObject>(obj);
+            go.name = mUIName;
+            go.transform.parent = UIMgr.UIRootTrsansform;
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localScale = Vector3.one;
+            go.transform.localRotation = Quaternion.identity;
 
+            UIMgr.OnCreate(this);
+            UIMgr.OnEnable(this);
         }
 
         public void OnUnShow()

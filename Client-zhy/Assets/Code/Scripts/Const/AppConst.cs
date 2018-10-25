@@ -11,7 +11,7 @@ public class AppConst
     static AppConst()
     {
         AssetPath = Application.dataPath;
-        UIPrefabPath = AssetPath + "Res/UI/Prefab/";
+        UIPrefabPath = "Assets/Res/UI/Prefab/";
     }
     
 

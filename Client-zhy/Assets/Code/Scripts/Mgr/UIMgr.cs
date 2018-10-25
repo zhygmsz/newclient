@@ -9,6 +9,24 @@ namespace GameCore
 {
     public class UIMgr
     {
+        static private Transform mUIRootTransform;
+        static public Transform UIRootTrsansform
+        {
+            get
+            {
+                if (mUIRootTransform == null)
+                {
+                    GameObject obj = GameObject.Find("UI Root");
+                    if (obj != null)
+                    {
+                        mUIRootTransform = obj.transform;    
+                    }
+                }
+
+                return mUIRootTransform;
+            }
+        }
+
         //ShowUI，UnShowUI方法接受的uiid，通过该字典查询对应的UIFrame
         //处理UI打开对于其他界面的互斥逻辑时，也需要对所有UI有一个统筹
         //所有该UIMgr里的方法，但凡传进来的参数是uiid，则都需要该字典
