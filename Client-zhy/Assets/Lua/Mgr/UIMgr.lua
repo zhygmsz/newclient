@@ -16,6 +16,7 @@ local function OnCreate(uiID, frame)
         end
     else
         --没找到uidata，提示
+        GameLog.LogError("UIMgr.OnCreate -> uiData is nil, uiID = %s", uiID)
     end
 end
 
@@ -26,7 +27,8 @@ local function OnEnable(uiID, frame)
             uiData.luaScript.OnEnable(frame)
         end
     else
-        --
+        GameLog.LogError("UIMgr.OnEnable -> uiData is nil, uiID = %s", uiID)
+        
     end
 end
 
@@ -37,7 +39,7 @@ local function OnDisable(uiID, frame)
             uiData.luaScript.OnDisable(frame)
         end
     else
-        --
+        GameLog.LogError("UIMgr.OnDisable -> uiData is nil, uiID = %s", uiID)
     end
 end
 
@@ -48,7 +50,7 @@ local function OnDestroy(uiID, frame)
             uiData.luaScript.OnDestroy(frame)
         end
     else
-        --
+        GameLog.LogError("UIMgr.OnDestroy -> uiData is nil, uiID = %s", uiID)
     end
 end
 
@@ -60,7 +62,7 @@ local function OnClick(uiID, eventID)
             uiData.luaScript.OnClick(eventID)
         end
     else
-        --
+        GameLog.LogError("UIMgr.OnClick -> uiData is nil, uiID = %s", uiID)
     end
 end
 
@@ -71,7 +73,7 @@ local function OnPress(uiID, isPressed, eventID)
             uiData.luaScript.OnPress(isPressed, eventID)
         end
     else
-
+        
     end
 end
 
