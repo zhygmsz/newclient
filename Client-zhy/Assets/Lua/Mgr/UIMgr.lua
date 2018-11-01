@@ -3,100 +3,71 @@ module("UIMgr", package.seeall)
 --C#层的UIMgr
 local mUIMgr = GameCore.UIMgr
 
-local function DoInvoke(funcName)
-    -- body
+local function DoInvoke(uiID, funcName, ...)
+    local uiData = AllUI.GetUIData(uiID)
+    if uiData then
+        if uiData.luaScript and uiData.luaScript[funcName] then
+            uiData.luaScript[funcName](...)
+        else
+            GameLog.LogError("UIMgr.DoInvoke -> func is not exist, funcName = %s", funcName)
+        end
+    else
+        GameLog.LogError("UIMgr.DoInvoke -> uiData is nil, uiID = %s", uiID)
+    end
 end
 
 --以下是UI状态事件方法
 local function OnCreate(uiID, frame)
-    local uiData = AllUI.GetUIData(uiID)
-    if uiData then
-        if uiData.luaScript and uiData.luaScript.OnCreate then
-            uiData.luaScript.OnCreate(frame)
-        end
-    else
-        --没找到uidata，提示
-        GameLog.LogError("UIMgr.OnCreate -> uiData is nil, uiID = %s", uiID)
-    end
+    DoInvoke(uiID, "OnCreate", frame)
 end
 
 local function OnEnable(uiID, frame)
-    local uiData = AllUI.GetUIData(uiID)
-    if uiData then
-        if uiData.luaScript and uiData.luaScript.OnEnable then
-            uiData.luaScript.OnEnable(frame)
-        end
-    else
-        GameLog.LogError("UIMgr.OnEnable -> uiData is nil, uiID = %s", uiID)
-        
-    end
+    DoInvoke(uiID, "OnEnable", frame)
 end
 
 local function OnDisable(uiID, frame)
-    local uiData = AllUI.GetUIData(uiID)
-    if uiData then
-        if uiData.luaScript and uiData.luaScript.OnDisable then
-            uiData.luaScript.OnDisable(frame)
-        end
-    else
-        GameLog.LogError("UIMgr.OnDisable -> uiData is nil, uiID = %s", uiID)
-    end
+    DoInvoke(uiID, "OnDisable", frame)
 end
 
 local function OnDestroy(uiID, frame)
-    local uiData = AllUI.GetUIData(uiID)
-    if uiData then
-        if uiData.luaScript and uiData.luaScript.OnDestroy then
-            uiData.luaScript.OnDestroy(frame)
-        end
-    else
-        GameLog.LogError("UIMgr.OnDestroy -> uiData is nil, uiID = %s", uiID)
-    end
+    DoInvoke(uiID, "OnDestroy", frame)
 end
 
 --以下是NGUI事件方法
 local function OnClick(uiID, eventID)
-    local uiData = AllUI.GetUIData(uiID)
-    if uiData then
-        if uiData.luaScript and uiData.luaScript.OnClick then
-            uiData.luaScript.OnClick(eventID)
-        end
-    else
-        GameLog.LogError("UIMgr.OnClick -> uiData is nil, uiID = %s", uiID)
-    end
+    DoInvoke(uiID, "OnClick", eventID)
 end
 
 local function OnPress(uiID, isPressed, eventID)
-    local uiData = AllUI.GetUIData(uiID)
-    if uiData then
-        if uiData.luaScript and uiData.luaScript.OnPress then
-            uiData.luaScript.OnPress(isPressed, eventID)
-        end
-    else
-        
-    end
+    DoInvoke(uiID, "OnPress", isPressed, eventID)
 end
 
 local function OnSelect(uiID, selected, eventID)
+    DoInvoke(uiID, "OnSelect", selected, eventID)
 end
 
 local function OnDoubleClick(uiID, eventID)
+    DoInvoke(uiID, "OnDoubleClick", eventID)
 end
 
 local function OnDragStart(uiID, eventID)
+    DoInvoke(uiID, "OnDragStart", eventID)
 end
 
 local function OnDrag(uiID, delta, eventID)
+    DoInvoke(uiID, "OnDrag", delta, eventID)
 end
 
 local function OnDragEnd(uiID, eventID)
+    DoInvoke(uiID, "OnDragEnd", eventID)
 end
 
 local function OnDragOver(uiID, obj, eventID)
+    DoInvoke(uiID, "OnDragOver", obj, eventID)
 end
 
 local function OnDragOut(uiID, obj, eventID)
-    
+    DoInvoke(uiID, "OnDragOut", obj, eventID)
 end
 
 function Init()

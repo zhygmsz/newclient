@@ -11,7 +11,7 @@ local function LogError(format, ...)
 end
 
 local function LogWarning(format, ...)
-    Utils.LogWarningtraceback(string.format(format, ...))()
+    Utils.LogWarning(traceback(string.format(format, ...)))
 end
 
 --执行逻辑的方法做成local的，在luajit里是受推荐的方式

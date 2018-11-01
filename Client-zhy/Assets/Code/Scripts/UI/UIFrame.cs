@@ -51,6 +51,13 @@ namespace GameCore
             go.transform.localScale = Vector3.one;
             go.transform.localRotation = Quaternion.identity;
 
+            //获取所有UIEvent，并设置其UIID为当前UIFrame的
+            var uiEvents = go.GetComponentsInChildren<UIEvent>();
+            for (int idx = 0, count = uiEvents.Length; idx < count; ++idx)
+            {
+                uiEvents[idx].UIID = UIID;
+            }
+
             UIMgr.OnCreate(this);
             UIMgr.OnEnable(this);
         }
