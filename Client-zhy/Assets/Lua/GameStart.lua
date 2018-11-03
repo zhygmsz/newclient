@@ -1,9 +1,32 @@
-local function InitGame()
-	require("GameInit").Init()
+local function InitDebug()
+	require("Logic/Framework/ToLua/debug/" .. (jit and "LuaDebugjit" or "LuaDebug"))("localhost", 7003)
 end
 
-local function InitDebug()
-	require("DebugSystem.DebugHelper").Init()
+local function InitCommon()
+	--日志（直接调用cs）
+	require("Logic/Framework/Common/GameLog")
+
+	--类构造器
+	require("Logic/Framework/Common/Class")
+
+	--资源管理
+	require("Logic/Framework/ResMgr/ResMgr").Init()
+
+	--UI管理
+	require("Logic/Framework/ResMgr/UIMgr").Init()
+	require("Logic/Presentation/UI/Define/AllUI").Init()
+end
+
+local function InitLogic()
+	require("Logic/GameInit/GameInit").Init()
+end
+
+local function Init()
+	InitDebug()
+
+	InitCommon()
+
+	InitLogic()
 end
 
 --[[
@@ -12,8 +35,7 @@ end
 function Start()
 	print("GameStart.Start -> ")
 
-	InitDebug()
-	InitGame()
+	Init()
 
 	--测试
 	Test()
