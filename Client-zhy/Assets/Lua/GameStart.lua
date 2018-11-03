@@ -43,5 +43,6 @@ end
 
 function Test()
 	--打开第一个UI，测试UI框架
-	UIMgr.ShowUI(AllUI.UI_Test)
+	--UIMgr.ShowUI(AllUI.UI_Test)
+	UIMgr.ShowUI(AllUI.UI_Chat_Main)
 end

@@ -7,6 +7,9 @@ local function InitCommon()
     --基础服务
     require("Logic/Framework/Common/GameConfig")
     require("Logic/Framework/Common/GameUtils")
+
+    --pb文件加载
+    require("Logic/Proto/AllPB").Init()
     
     --容器
     require("Logic/Framework/Container/List")

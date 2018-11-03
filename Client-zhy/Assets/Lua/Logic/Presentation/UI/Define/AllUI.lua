@@ -51,6 +51,7 @@ end
 
 local function InitDefine()
     require("Logic/Presentation/UI/Define/TestDefine")
+    require("Logic/Presentation/UI/Define/UISystemDefine")
 end
 
 function Init()
