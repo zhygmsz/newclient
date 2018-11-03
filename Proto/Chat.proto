@@ -1,0 +1,113 @@
+syntax = "proto2";
+
+enum ChatRoomType
+{
+    CHAT_ROOM_NONE          = 0;    //  什么房间都不是
+    CHAT_ROOM_WORLD         = 901;    //  世界  单服唯一ROOM
+    CHAT_ROOM_TEAM          = 902;    //  队伍  单服唯一ROOM
+    CHAT_ROOM_GANG          = 903;    //  帮会  单服每个帮派一个ROOM
+    CHAT_ROOM_PROFESSION    = 904;    //  门派  单服每个门派一个ROOM
+    CHAT_ROOM_SCENE         = 905;    //  当前  单服每条线每个场景一个ROOM
+    CHAT_ROOM_NEW           = 906;    //  新手  待定
+    CHAT_ROOM_CITY          = 907;    //  同城  待定
+    CHAT_ROOM_SYSTEM        = 908;    //  系统  单服唯一ROOM
+
+    CHAT_ROOM_BULLET        = 9;    //  弹幕  全服每个剧情一个ROOM
+    CHAT_ROOM_GROUP_TEMP    =11;    //  群聊  全服每个群组一个ROOM,该类群组有客户端群主通过聊天服管理
+    CHAT_ROOM_GROUP_FRIEND  =12;    //  群聊  全服每个群组一个ROOM,该类群组由服务器好友逻辑管理
+	CHAT_ROOM_NOTICE_SINGLE =13;	//	公告  单服唯一ROOM
+    CHAT_ROOM_NOTICE_GLOBAL =14;    //  公告  全服唯一ROOM
+}
+
+enum ChatMsgType
+{
+    CHATMSG_BULLET_ADD                  = 1;            //新增弹幕
+    CHATMSG_BULLET_THUMBUP_TRANSMIT     = 2;            //点赞通知
+    CHATMSG_BULLET_COMMENT_TRANSMIT     = 3;            //评论通知
+    CHATMSG_COMMON                      = 4;            //通用房间消息
+    CHATMSG_FRIEND_PRIVATE              = 5;            //好友一对一私聊
+    CHATMSG_TEAM_PRIVATE                = 6;            //队伍私聊
+    CHATMSG_FRIEND_QUN                  = 7;            //好友群聊
+    CHATMSG_PAINT                       = 8;            //绘图
+}
+
+message ChatMsgSender
+{
+    optional string senderID = 1;
+    optional int32 senderLevel = 2;
+    optional string senderName = 3;
+    optional string senderDetail = 4;
+}
+
+//系统表情描述
+message MsgLinkDescEmoji
+{
+    optional string name = 1;
+}
+
+//可点击，带颜色的文本描述
+message MsgLinkDescText
+{
+    optional string color = 1;
+}
+
+//图片描述
+message MsgLinkDescTexture
+{
+    optional string name = 1;
+}
+
+//超链接的描述
+message MsgLinkDesc
+{
+    optional MsgLinkDescEmoji emojiDesc = 1;
+    optional MsgLinkDescText textDesc = 2;
+    optional MsgLinkDescTexture textureDesc = 3;
+}
+
+message ChatMsgLink
+{
+    enum LinkType
+    {
+        AT     = 0;             //@信息
+        PLAYER = 1;             //玩家信息
+        PAINT = 2;              //绘图信息
+        EMOJI = 3;              //系统表情信息
+        EMOJI_CUSTOM = 4;       //自定义表情信息
+        ITEM = 5;               //道具
+    }
+    optional LinkType linkType = 1;
+    repeated int32 intParams = 2;
+    repeated string strParams = 3; 
+    repeated bytes byteParams = 4; 
+    optional string content = 5;
+    optional bool isValid = 6;  //该链接是否还有效
+    optional MsgLinkDesc linkDesc = 7;
+    optional int32 staticID = 8;  //用于判断输入链接的唯一性
+    optional int32 dynamicID = 9;
+    optional int32 contentAutoId = 10;
+    optional string contentWithId = 11;
+}
+
+message ChatMsgCommon
+{
+    //发送者信息
+    optional ChatMsgSender sender = 1;
+    //房间类型
+    optional ChatRoomType roomType = 2;
+    //链接信息(用于控制如何解释文字信息或者附带额外的道具、任务等等信息)
+    repeated ChatMsgLink links = 3;
+    //文字信息
+    optional string content = 4;
+    //文字前缀
+    optional string contentPrefix = 5;
+    //文字后缀
+    optional string contentPostfix = 6;
+}
+
+message ChatMsg
+{
+    optional int32 msgID = 1;
+    optional ChatMsgType msgType = 2;
+    optional bytes msgData = 3;
+}
