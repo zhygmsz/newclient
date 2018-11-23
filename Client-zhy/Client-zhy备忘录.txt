@@ -24,7 +24,6 @@ Prefab引用的脚本在NGUI的dll里，现在把dll去掉，换成源代码，�
 148：contentitem/widget扩展item支持多个uieventid，支持两种模式，一种单选的，一种多选的
 149：UIWrapContent支持自动选中并下滑到某个指定的realIdx
 155：列出UIPrefab上的所有panel以及路径
-156：UI关闭，所有数据均为脏数据，每次打开都用新数据刷新
 157：测试UIWrapContent的上下滑动回调性能
 158：重写UITableWrapContent，把需要回调的realidx用集合保存起来，每次执行完回调就清空该集合，上下滑动过程中计算那些realidx应该进该集合。做法类似资源加载模块，把资源的加载状态分类一步只处理一个状态，下一步过程交给另外的方法处理，每个步骤处理方法执行完后设置状态，然后使用更新的方式驱动。
 159：把UIPageAndGrid组件的Page做成可循环使用的结构，引入UIWrapContent组件，这样对方便对每一个Item分配UI事件id，不再对dataList做划分，使用原生的带有顺序的dataList为数据源，不同的page引用不同的数据区间即可，更方便，减少table创建
@@ -34,8 +33,6 @@ Prefab引用的脚本在NGUI的dll里，现在把dll去掉，换成源代码，�
 165：方法A内的local方法B，那么A每被调一次，B就创建一次吗？
 167：UIPanel的GameObject层级关系A B ，B内的一个Transform使用GetComponentInParents，如果B是隐藏的，则会找到A，查代码
 168：把对象池的方式换成GameEvent的写法，严格按照table的进出方式，不再用item里设置状态，并以遍历的方式找合法的状态的方式
-170：NGUI字体加粗bug改良
-171：自定义表情图片缩略图加载，只用一个尺寸，最大不超过256即可。放置原图过大情况，在UITexture的尺寸上做适应UI
 170：NGUI字体加粗bug改良
 
 -------------------------------------------------------待做项-------------------------------------------------------
