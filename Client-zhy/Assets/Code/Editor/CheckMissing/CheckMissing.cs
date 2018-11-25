@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using YamlParser;
 
 public class CheckMissing
 {
@@ -35,7 +36,8 @@ public class CheckMissing
         }
 
         HashSet<string> guidSet = GetGUIDSet();
-
+        ParserBase parserBase = new ParserBase(path);
+        parserBase.LogScriptMissing(guidSet);
     }
 
     private static HashSet<string> GetGUIDSet()
