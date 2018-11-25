@@ -13,7 +13,7 @@ namespace YamlParser
         protected Dictionary<string, GameObjectNode> mGameObjectNodeDic = new Dictionary<string, GameObjectNode>();
         protected Dictionary<string, MonoBehaviourNode> mMonoBehaviourNodeDic = new Dictionary<string, MonoBehaviourNode>();
 
-            
+        
         public ParserBase(string path)
         {
             mPath = path;

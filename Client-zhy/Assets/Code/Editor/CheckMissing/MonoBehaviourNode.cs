@@ -6,21 +6,14 @@ namespace YamlParser
 {
     public class MonoBehaviourNode : NodeBase
     {
-        protected string mPrefabInternal;
-        protected string mGameObject;
+        protected string mGameObjectFileID;
         protected string mScriptGUID;
         protected string mScriptFileID;
         protected int mScriptType;
 
-
-        public string PrefabInternalFileID
-        {
-            get { return mPrefabInternal; }
-        }
-
         public string GameObjectFileID
         {
-            get { return mGameObject; }
+            get { return mGameObjectFileID; }
         }
 
         public string ScriptGUID
@@ -57,13 +50,9 @@ namespace YamlParser
         public override void Append(string line)
         {
             base.Append(line);
-            if (line.Contains("m_PrefabInternal"))
+            if (line.Contains("m_GameObject"))
             {
-                mPrefabInternal = GetOneFileID(line);
-            }
-            else if (line.Contains("m_GameObject"))
-            {
-                mGameObject = GetOneFileID(line);
+                mGameObjectFileID = GetOneFileID(line);
             }
             else if (line.Contains("m_Script") && line.Contains("fileID") && line.Contains("guid"))
             {
