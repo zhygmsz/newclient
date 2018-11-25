@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace YamlParser
 {
+    //假定，只有XXXRenderer里有m_Materials
     public class RendererNode : NodeBase
     {
         protected string mGameObjectFileID;
@@ -30,6 +31,7 @@ namespace YamlParser
             base.End();
         }
 
+        //现在问题是，材质有多个的时候，这里又没有sr，该如判断当前line
         public override void Append(string line)
         {
             base.Append(line);
