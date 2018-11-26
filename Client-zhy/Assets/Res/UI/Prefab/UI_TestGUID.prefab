@@ -108,6 +108,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1962236106276042
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4733613309008434}
+  - component: {fileID: 114876514436295518}
+  m_Layer: 0
+  m_Name: monoscript
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!4 &4005727916090968
 Transform:
   m_ObjectHideFlags: 1
@@ -188,8 +204,22 @@ Transform:
   - {fileID: 4244295289591040}
   - {fileID: 4190751856406438}
   - {fileID: 4005727916090968}
+  - {fileID: 4733613309008434}
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &4733613309008434
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1962236106276042}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4584274045092360}
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &23301316440461436
 MeshRenderer:
@@ -341,6 +371,29 @@ MonoBehaviour:
   mAtlas: {fileID: 114434935930997574, guid: ed4995accaf43fe4d9b5c6f82d4ff62b, type: 2}
   mSpriteName: bg_common_03
   mFillCenter: 1
+--- !u!114 &114876514436295518
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1962236106276042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9d06289be8a7324a93c9478cc7f5ea7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mTex1: {fileID: 0}
+  mTex2: {fileID: 0}
+  mTex2D1: {fileID: 2800000, guid: bb3e8b26efa431e41b929d96156008e9, type: 3}
+  mTex2D2: {fileID: 2800000, guid: bb3e8b26efa431e41b929d96156008e9, type: 3}
+  mUIAatlas1: {fileID: 0}
+  mUIAatlas2: {fileID: 0}
+  mUISprite1: {fileID: 0}
+  mUISprite2: {fileID: 0}
+  mMat1: {fileID: 2100000, guid: 0bd4a7957afe19e45875fb231a46c7be, type: 2}
+  mMat2: {fileID: 2100000, guid: 1d8024dbdfe30164f88a2f7463e9b4f3, type: 2}
+  mPs1: {fileID: 0}
+  mPs2: {fileID: 0}
 --- !u!114 &114952730293867120
 MonoBehaviour:
   m_ObjectHideFlags: 1
