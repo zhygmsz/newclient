@@ -4,41 +4,18 @@ using UnityEngine;
 
 namespace YamlParser
 {
-    public class PrefabNode : NodeBase
+    public struct PrefabNode
     {
-        //记录该Prefab的RootGameObject对应的fileID
-        private string mRootGameObject = "-1";
+        private string mRootGoFileID;
 
-        public string RootGameObjectFileID
+        public string RootGoFileID
         {
-            get
-            {
-                return mRootGameObject;
-            }
+            get { return mRootGoFileID; }
         }
 
-        public PrefabNode()
+        public PrefabNode(string rootGoFileID)
         {
-
-        }
-
-        public override void Begin()
-        {
-            base.Begin();
-        }
-
-        public override void End()
-        {
-            base.End();
-        }
-
-        public override void Append(string line)
-        {
-            base.Append(line);
-            if (line.Contains("m_RootGameObject"))
-            {
-                mRootGameObject = GetOneFileID(line);
-            }
+            mRootGoFileID = rootGoFileID;
         }
     }
 }
