@@ -30,7 +30,6 @@ namespace YamlParser
             mFileID = fileID;
             mGoFileID = goFileID;
             mGUID = guid;
-
         }
     }
 }

@@ -11,9 +11,9 @@ namespace YamlParser
 
         protected Dictionary<string, PrefabNode> mPrefabNodeDic = new Dictionary<string, PrefabNode>();
         protected Dictionary<string, GoNode> mGoNodeDic = new Dictionary<string, GoNode>();
-        protected Dictionary<string, CommonNode> mScriptNodeDic = new Dictionary<string, CommonNode>();
-        protected Dictionary<string, CommonNode> mMatNodeDic = new Dictionary<string, CommonNode>();
-        protected Dictionary<string, CommonNode> mShaderNodeDic = new Dictionary<string, CommonNode>();
+        protected List<CommonNode> mScriptNodeList = new List<CommonNode>();
+        protected List<CommonNode> mMatNodeList = new List<CommonNode>();
+        protected List<CommonNode> mShaderNodeList = new List<CommonNode>();
 
 
         public ParserBase(string path)
@@ -24,16 +24,43 @@ namespace YamlParser
 
         public void LogScriptMissing(HashSet<string> guidSet)
         {
-            foreach (KeyValuePair<string, CommonNode> kvp in mScriptNodeDic)
+            foreach (CommonNode node in mScriptNodeList)
             {
-                if (!guidSet.Contains(kvp.Value.GUID))
+                if (!guidSet.Contains(node.GUID))
                 {
-                    string goName = mGoNodeDic[kvp.Value.GoFileID].Name;
-                    string log = string.Format("path = {0}, guid = {1}, goName = {2}", mPath, kvp.Value.GUID, goName);
+                    string goName = mGoNodeDic[node.GoFileID].Name;
+                    string log = string.Format("path = {0}, guid = {1}, goName = {2}", mPath, node.GUID, goName);
                     Debug.LogError(log);
                 }
             }
         }
+
+        public void LogMatMissing(HashSet<string> guidSet)
+        {
+            foreach (CommonNode node in mMatNodeList)
+            {
+                if (!guidSet.Contains(node.GUID))
+                {
+                    string goName = mGoNodeDic[node.GoFileID].Name;
+                    string log = string.Format("path = {0}, guid = {1}, goName = {2}", mPath, node.GUID, goName);
+                    Debug.LogError(log);
+                }
+            }
+        }
+
+        public void LogShaderMissing(HashSet<string> guidSet)
+        {
+            foreach (CommonNode node in mShaderNodeList)
+            {
+                if (!guidSet.Contains(node.GUID))
+                {
+                    string goName = mGoNodeDic[node.GoFileID].Name;
+                    string log = string.Format("path = {0}, guid = {1}, goName = {2}", mPath, node.GUID, goName);
+                    Debug.LogError(log);
+                }
+            }
+        }
+
 
         protected virtual void Parse()
         {
@@ -69,12 +96,30 @@ namespace YamlParser
                 }
                 else if (line.Contains("m_GameObject"))
                 {
-                    //计算出m_GameObject对应的fileID
+                    //计算出该组件对应的m_GameObject的fileID
                     goFileID = line.Replace(" ", "").Replace("}", "").Split(':')[2];
                 }
                 else if (line.Contains("fileID") && line.Contains("guid"))
                 {
+                    string curFileID = line.Replace(" ", "").Split('{')[1].Split('}')[0].Split(',')[0].Split(':')[1];
+                    string curGUID = line.Replace(" ", "").Split('{')[1].Split('}')[0].Split(',')[1].Split(':')[1];
+                    CommonNode newCommonNode = new CommonNode(fileID, goFileID, curGUID);
                     //根据不同的fileID判断具体的node类型
+                    if (curFileID == "11500000")
+                    {
+                        //script
+                        mScriptNodeList.Add(newCommonNode);
+                    }
+                    else if (curFileID == "2100000")
+                    {
+                        //material
+                        mMatNodeList.Add(newCommonNode);
+                    }
+                    else if (curFileID == "4800000")
+                    {
+                        //shader
+                        mShaderNodeList.Add(newCommonNode);
+                    }
                 }
             }
         }

@@ -37,7 +37,23 @@ public class CheckMissing
         DoFindScriptMissing(path, guidSet);
     }
 
-    public static void FindSelectedMaterialMissing()
+    [MenuItem("引用检查/列出所有的材质引用丢失信息")]
+    public static void FindAllMatMising()
+    {
+        List<string> matList = new List<string>() { "*.mat.meta" };
+        HashSet<string> guidSet = GetGUIDSet(matList);
+
+        List<string> prefabAndUnityList = new List<string>();
+        prefabAndUnityList.AddRange(GetFiles("Assets", "*.prefab"));
+        prefabAndUnityList.AddRange(GetFiles("Assets", "*.unity"));
+        foreach (string path in prefabAndUnityList)
+        {
+            DoFindMatMissing(path, guidSet);
+        }
+    }
+
+    [MenuItem("Assets/引用检查/列出材质引用丢失信息")]
+    public static void FindSelectedMatMissing()
     {
         string path;
         if (!CheckCommon(out path))
@@ -45,7 +61,10 @@ public class CheckMissing
             return;
         }
 
+        List<string> matList = new List<string>() { "*.mat.meta" };
+        HashSet<string> guidSet = GetGUIDSet(matList);
 
+        DoFindMatMissing(path, guidSet);
     }
 
     private static void DoFindScriptMissing(string path, HashSet<string> guidSet)
@@ -54,9 +73,10 @@ public class CheckMissing
         parserBase.LogScriptMissing(guidSet);
     }
 
-    private static void DoFindMaterialMissing(string path, HashSet<string> guidSet)
+    private static void DoFindMatMissing(string path, HashSet<string> guidSet)
     {
-
+        ParserBase parserBase = new ParserBase(path);
+        parserBase.LogMatMissing(guidSet);
     }
 
     private static HashSet<string> GetGUIDSet(List<string> suffixList)
