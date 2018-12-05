@@ -54,8 +54,7 @@ namespace YamlParser
             {
                 if (!guidSet.Contains(node.GUID))
                 {
-                    string goName = mGoNodeDic[node.GoFileID].Name;
-                    string log = string.Format("path = {0}, guid = {1}, goName = {2}", mPath, node.GUID, goName);
+                    string log = string.Format("path = {0}, guid = {1}", mPath, node.GUID);
                     Debug.LogError(log);
                 }
             }
@@ -117,7 +116,7 @@ namespace YamlParser
                     }
                     else if (curFileID == "4800000")
                     {
-                        //shader
+                        //shader，没有goFileID
                         mShaderNodeList.Add(newCommonNode);
                     }
                 }

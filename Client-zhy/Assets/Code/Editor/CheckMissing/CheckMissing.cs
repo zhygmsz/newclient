@@ -22,23 +22,8 @@ public class CheckMissing
         }
     }
 
-    [MenuItem("Assets/引用检查/列出脚本引用丢失信息")]
-    public static void FindSelectedScriptMissing()
-    {
-        string path;
-        if (!CheckCommon(out path))
-        {
-            return;
-        }
-
-        List<string> scriptList = new List<string>() { "*.cs.meta", "*.js.meta" };
-        HashSet<string> guidSet = GetGUIDSet(scriptList);
-
-        DoFindScriptMissing(path, guidSet);
-    }
-
     [MenuItem("引用检查/列出所有的材质引用丢失信息")]
-    public static void FindAllMatMising()
+    public static void FindAllMatMissing()
     {
         List<string> matList = new List<string>() { "*.mat.meta" };
         HashSet<string> guidSet = GetGUIDSet(matList);
@@ -52,11 +37,42 @@ public class CheckMissing
         }
     }
 
+    [MenuItem("引用检查/列出所有的Shader引用丢失信息")]
+    public static void FindAllShaderMissing()
+    {
+        List<string> shaderList = new List<string>() { "*.shader.meta" };
+        HashSet<string> guidSet = GetGUIDSet(shaderList);
+
+        List<string> matList = new List<string>();
+        matList.AddRange(GetFiles("Assets", "*.mat"));
+        foreach (string path in matList)
+        {
+            DoFindShaderMissing(path, guidSet);
+        }
+    }
+
+    [MenuItem("Assets/引用检查/列出脚本引用丢失信息")]
+    public static void FindSelectedScriptMissing()
+    {
+        string path;
+        List<string> suffixNameList = new List<string>() { ".prefab", ".unity" };
+        if (!CheckCommon(out path, suffixNameList))
+        {
+            return;
+        }
+
+        List<string> scriptList = new List<string>() { "*.cs.meta", "*.js.meta" };
+        HashSet<string> guidSet = GetGUIDSet(scriptList);
+
+        DoFindScriptMissing(path, guidSet);
+    }
+
     [MenuItem("Assets/引用检查/列出材质引用丢失信息")]
     public static void FindSelectedMatMissing()
     {
         string path;
-        if (!CheckCommon(out path))
+        List<string> suffixNameList = new List<string>() { ".prefab", ".unity" };
+        if (!CheckCommon(out path, suffixNameList))
         {
             return;
         }
@@ -65,6 +81,22 @@ public class CheckMissing
         HashSet<string> guidSet = GetGUIDSet(matList);
 
         DoFindMatMissing(path, guidSet);
+    }
+
+    [MenuItem("Assets/引用检查/列出Shader引用丢失信息")]
+    public static void FindSelectedShaderMissing()
+    {
+        string path;
+        List<string> suffixNameList = new List<string>() { ".mat" };
+        if (!CheckCommon(out path, suffixNameList))
+        {
+            return;
+        }
+
+        List<string> shaderList = new List<string>() { "*.shader.meta" };
+        HashSet<string> guidSet = GetGUIDSet(shaderList);
+
+        DoFindShaderMissing(path, guidSet);
     }
 
     private static void DoFindScriptMissing(string path, HashSet<string> guidSet)
@@ -77,6 +109,12 @@ public class CheckMissing
     {
         ParserBase parserBase = new ParserBase(path);
         parserBase.LogMatMissing(guidSet);
+    }
+
+    private static void DoFindShaderMissing(string path, HashSet<string> guidSet)
+    {
+        ParserBase parserBase = new ParserBase(path);
+        parserBase.LogShaderMissing(guidSet);
     }
 
     private static HashSet<string> GetGUIDSet(List<string> suffixList)
@@ -95,12 +133,15 @@ public class CheckMissing
             sr.ReadLine();
             string guid = sr.ReadLine().Replace(" ", "").Split(':')[1];
             guidSet.Add(guid);
+
+            fs.Close();
+            sr.Close();
         }
 
         return guidSet;
     }
 
-    private static bool CheckCommon(out string path)
+    private static bool CheckCommon(out string path, List<string> suffixNameList)
     {
         path = "";
         bool legal = true;
@@ -121,7 +162,6 @@ public class CheckMissing
             }
 
             path = AssetDatabase.GetAssetPath(obj);
-            List<string> suffixNameList = new List<string>() { ".prefab", ".unity" };
             if (!CheckSuffixName(path, suffixNameList))
             {
                 legal = false;
