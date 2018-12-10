@@ -41,8 +41,19 @@ function Start()
 	Test()
 end
 
+local function Func1()
+	GameLog.LogError("GameStart.Func1------------------------")
+end
+
 function Test()
 	--打开第一个UI，测试UI框架
-	--UIMgr.ShowUI(AllUI.UI_Test)
-	UIMgr.ShowUI(AllUI.UI_Chat_Main)
+	UIMgr.ShowUI(AllUI.UI_Test, Func1, nil, false, "赵昊杨", "宋雅雯")
+	--UIMgr.ShowUI(AllUI.UI_Chat_Main)
+
+	--测试require和module
+	local test1 = require("Common/Test1")
+	local val = _G["Test1"];
+	local val2 = package.loaded["Test1"];
+	local test2 = require("Common/Test2")
+	local val3 = "zhaohaoyang"
 end

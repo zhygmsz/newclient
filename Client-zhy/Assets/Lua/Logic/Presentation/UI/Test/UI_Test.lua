@@ -4,8 +4,10 @@ function OnCreate(self)
     GameLog.Log("---------------------OnCreate")
 end
 
-function OnEnable(self)
+function OnEnable(self, myName, herName)
     GameLog.Log("---------------------OnEnable")
+    --GameLog.LogError(myName)
+    --GameLog.LogError(herName)
 end
 
 function OnDisable(self)
