@@ -6,8 +6,9 @@ end
 
 function OnEnable(self, myName, herName)
     GameLog.Log("---------------------OnEnable")
-    --GameLog.LogError(myName)
-    --GameLog.LogError(herName)
+    GameLog.LogError(myName)
+    GameLog.LogError(herName)
+    local val = 1
 end
 
 function OnDisable(self)

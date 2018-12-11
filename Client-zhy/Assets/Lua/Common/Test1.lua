@@ -1,4 +1,4 @@
-local val = "宋雅雯"
+local val = "song"
 
 Songyawen = { name = val }
 --return Songyawen

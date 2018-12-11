@@ -11,8 +11,6 @@ local function DoInvoke(uiID, funcName, ...)
     local uiData = AllUI.GetUIData(uiID)
     if uiData then
         if uiData.luaScript and uiData.luaScript[funcName] then
-            local val1 = {...}
-            --uiData.luaScript[funcName](...)
             local flag, errMsg = xpcall(uiData.luaScript[funcName], traceback, ...)
             if flag then
                 --调用成功
@@ -21,7 +19,6 @@ local function DoInvoke(uiID, funcName, ...)
                 --输出调用堆栈错误
                 GameLog.LogError(errMsg)
             end
-            --uiData.luaScript[funcName](...)
         else
             GameLog.LogError("UIMgr.DoInvoke -> func is not exist, funcName = %s", funcName)
         end
@@ -39,22 +36,23 @@ end
 local function OnEnable(uiID, frame)
     local uiData = AllUI.GetUIData(uiID)
     if uiData then
-        uiData.args = uiData.args or {}
-        table.insert(uiData.args, 1, frame)
-        local success = DoInvoke(uiID, "OnEnable", unpack(uiData.args))
+        local success = false
+        if uiData.args then
+            success = DoInvoke(uiID, "OnEnable", frame, unpack(uiData.args))
+        else
+            success = DoInvoke(uiID, "OnEnable", frame)
+        end
         if success then
             --继续OnEnable内额外的逻辑
             if uiData.func then
+                local flag, errMsg
                 if uiData.obj then
-                    local flag, errMsg = xpcall(uiData.func, traceback, uiData.obj)
-                    if not flag then
-                        GameLog.LogError(errMsg)
-                    end
+                    flag, errMsg = xpcall(uiData.func, traceback, uiData.obj)
                 else
-                    local flag, errMsg = xpcall(uiData.func, traceback)
-                    if not flag then
-                        GameLog.LogError(errMsg)
-                    end
+                    flag, errMsg = xpcall(uiData.func, traceback)
+                end
+                if not flag then
+                    GameLog.LogError(errMsg)
                 end
             end
         end

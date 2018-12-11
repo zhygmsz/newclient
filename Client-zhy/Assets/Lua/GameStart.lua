@@ -47,7 +47,7 @@ end
 
 function Test()
 	--打开第一个UI，测试UI框架
-	UIMgr.ShowUI(AllUI.UI_Test, Func1, nil, false, "赵昊杨", "宋雅雯")
+	UIMgr.ShowUI(AllUI.UI_Test, Func1, nil, true, "赵昊杨", "song")
 	--UIMgr.ShowUI(AllUI.UI_Chat_Main)
 
 	--测试require和module
