@@ -6,6 +6,11 @@ local traceback = debug.traceback
 --C#层的UIMgr
 local mUIMgr = GameCore.UIMgr
 
+--界面关闭后需要执行的回调信息，按需往里注册，生效一次，自动清理
+local mInvokeDataOnClose = {}
+--界面打开前回调信息，按需往里注册，生效一次，自动清理
+local mInvokeDataOnOpen = {}
+
 local function DoInvoke(uiID, funcName, ...)
     local success = false
     local uiData = AllUI.GetUIData(uiID)
@@ -130,6 +135,10 @@ function ShowUI(uiData, func, obj, hasArg, ...)
         uiData.func = func
         uiData.obj = obj
         uiData.args = hasArg and {...} or nil
+
+        --打开前回调
+        DoInvokeFuncOnOpen(uiData)
+
         mUIMgr.ShowUI(uiData.uiID, uiData.uiName)
     else
         GameLog.LogError("UIMgr.ShowUI -> uiData is nil")
@@ -139,9 +148,93 @@ end
 function UnShowUI(uiData)
     if AllUI.CheckIsValid(uiData) then
         mUIMgr.UnShowUI(uiData.uiID)
+        --关闭后回调
+        DoInvokeFuncOnClose(uiData)
     else
         GameLog.LogError("UIMgr.UnShowUI -> uiData is nil")
     end
 end
+
+--[[
+    @desc: 注册界面关闭后回调，执行一次，自动清理
+    --@uiData:
+	--@func:
+	--@obj: 
+]]
+function RegInvokeDataOnClose(uiData, func, obj)
+    local invokeData = mInvokeDataOnClose[uiData]
+    if not invokeData then
+        invokeData = {}
+        mInvokeDataOnClose[uiData] = invokeData
+    end
+    invokeData.func = func
+    invokeData.obj = obj
+end
+
+--[[
+    @desc: 注册界面打开前回调，执行一次，自动清理
+    --@uiData:
+	--@func:
+	--@obj: 
+]]
+function RegInvokeDataOnOpen(uiData, func, obj)
+    local invokeData = mInvokeDataOnOpen[uiData]
+    if not invokeData then
+        invokeData = {}
+        mInvokeDataOnOpen[uiData] = invokeData
+    end
+    invokeData.func = func
+    invokeData.obj = obj
+end
+
+--[[
+    @desc: 界面关闭时，试探性的调用，没有则不处理，又则执行回调
+    执行完回调后，自动清理
+    --@uiData: 
+]]
+function DoInvokeFuncOnClose(uiData)
+    if not uiData then
+        return
+    end
+    local invokeData = mInvokeDataOnClose[uiData]
+    if not invokeData then
+        return
+    end
+
+    if invokeData.func then
+        if invokeData.obj then
+            invokeData.func(invokeData.obj)
+        else
+            invokeData.func()
+        end
+    end
+
+    --清理
+    invokeData.func = nil
+    invokeData.obj = nil
+end
+
+function DoInvokeFuncOnOpen(uiData)
+    if not uiData then
+        return
+    end
+    local invokeData = mInvokeDataOnOpen[uiData]
+    if not invokeData then
+        return
+    end
+
+    if invokeData.func then
+        if invokeData.obj then
+            invokeData.func(invokeData.obj)
+        else
+            invokeData.func()
+        end
+    end
+
+    --清理
+    invokeData.func = nil
+    invokeData.obj = nil
+end
+
 
 return UIMgr
