@@ -1,24 +1,29 @@
 
 
 --工作机上的待做项
-100：新的UI遮罩是如何通过sortorder和depth一起工作的
-103：tolua.c里的indexevent和newindexevent方法是怎么触发的，event方法和wrap里的方法先后顺序
-107：看panel的裁剪，上下拖拽时，查看panel和scrollview的上下移动，以及panel的offset，裁剪shader
-114：查pixelSizeAdjustment的根源，查UIRoot工作原理
-123：查tolua的委托时怎么生成的
-129：UIParticle和UISpriteGray和panel内裁剪UISpriteGray
-137：重写检测输入框文本对应的链接是否有效的字符串查找方法，整个聊天里，要做到处理字符串的过程中尽可能少的产生额外的字符串，最好的方式是，原始字符串（这是必不可少的），最后以table.concat方式拼出一个总串，然后自己实现聊天需要的字符串算法
-147：当一个panel内的GameObject调用SetActive时，会触发panel的重绘吗？验证
-148：contentitem/widget扩展item支持多个uieventid，支持两种模式，一种单选的，一种多选的
-149：UIWrapContent支持自动选中并下滑到某个指定的realIdx
-157：测试UIWrapContent的上下滑动回调性能
-158：重写UITableWrapContent，把需要回调的realidx用集合保存起来，每次执行完回调就清空该集合，上下滑动过程中计算那些realidx应该进该集合。做法类似资源加载模块，把资源的加载状态分类一步只处理一个状态，下一步过程交给另外的方法处理，每个步骤处理方法执行完后设置状态，然后使用更新的方式驱动。
-163：测试直接将lua层的function赋值给C#层的委托，每次执行该委托时，是否会每次都创建一个tolua的委托对象
-164：一个lua层的function传到C#层，LuaFunction.cs是如何起到桥接作用的
-170：NGUI字体加粗bug改良
 
-155：列出UIPrefab上的所有panel以及路径
-156：写编辑器代码管控UI的图片格式，导入控制，选中后批量设置
+工具类
+列出UIPrefab上的所有panel以及路径
+写编辑器代码管控UI的图片格式，导入控制，选中后批量设置
+再写一个针对工程res/ui目录下的图片大小查看界面
+UIParticle和UISpriteGray和panel内裁剪UISpriteGray
+
+NGUI源码
+当一个panel内的GameObject调用SetActive时，会触发panel的重绘吗？验证（以这个为入口，开启NGUI源码）
+uisprite的顶点数，和其模式之间的关系，simple4，sliced16，tiled按平铺次数倍增，查代码
+NGUI一张图片的遮罩，不使用UIPanel，如何实现，学完shader后再来实现
+NGUI字体加粗bug改良，仔细看uilabel组件
+查pixelSizeAdjustment的根源，查UIRoot工作原理
+看panel的裁剪，上下拖拽时，查看panel和scrollview的上下移动，以及panel的offset，裁剪shader
+
+
+tolua细节
+记录今天看的tolua在C#与C之间传递字符串时候的细节，从C#到C到Lua的过程，以及反过来。utf-16与utf-8的转换工作并不在tolua里，在.net平台底层
+实地跟gameObject.transform.localPosition = pos这句代码的流程，开启tolua，并完善深入浅出tolua文档
+一个lua层的function传到C#层，LuaFunction.cs是如何起到桥接作用的
+测试直接将lua层的function赋值给C#层的委托，每次执行该委托时，是否会每次都创建一个tolua的委托对象
+查tolua的委托时怎么生成的
+tolua.c里的indexevent和newindexevent方法是怎么触发的，event方法和wrap里的方法先后顺序
 
 -------------------------------------------------------待做项-------------------------------------------------------
 --随笔记录对该项目的所有想要实现的
