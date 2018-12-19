@@ -3,7 +3,6 @@
 --工作机上的待做项
 
 工具类
-列出UIPrefab上的所有panel以及路径
 写编辑器代码管控UI的图片格式，导入控制，选中后批量设置
 再写一个针对工程res/ui目录下的图片大小查看界面
 UIParticle和UISpriteGray和panel内裁剪UISpriteGray
