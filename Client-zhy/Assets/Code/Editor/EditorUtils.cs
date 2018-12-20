@@ -34,4 +34,19 @@ public class EditorUtils
             LogUIPanel(trs, path + "/" + trs.name);
         }
     }
+
+    [MenuItem("程序专用/重新导入UI_Res目录下的图片资源")]
+    public static void ReimportAllUITexture()
+    {
+        string[] paths = CheckMissing.GetFiles("Assets/Res/UI", "*.png");
+        foreach (string path in paths)
+        {
+            var texImp = TextureImporter.GetAtPath(path);
+            if (texImp != null)
+            {
+                string subPath = path.Replace("\\", "/");
+                AssetDatabase.ImportAsset(subPath);
+            }
+        }
+    }
 }
