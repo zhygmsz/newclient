@@ -7,7 +7,7 @@ using YamlParser;
 
 public class CheckMissing
 {
-    [MenuItem("引用检查/列出所有的脚本引用丢失信息")]
+    [MenuItem("程序专用/引用检查/列出所有的脚本引用丢失信息")]
     public static void FindAllScriptMissing()
     {
         List<string> scriptList = new List<string>() { "*.cs.meta", "*.js.meta" };
@@ -22,7 +22,7 @@ public class CheckMissing
         }
     }
 
-    [MenuItem("引用检查/列出所有的材质引用丢失信息")]
+    [MenuItem("程序专用/引用检查/列出所有的材质引用丢失信息")]
     public static void FindAllMatMissing()
     {
         List<string> matList = new List<string>() { "*.mat.meta" };
@@ -37,7 +37,7 @@ public class CheckMissing
         }
     }
 
-    [MenuItem("引用检查/列出所有的Shader引用丢失信息")]
+    [MenuItem("程序专用/引用检查/列出所有的Shader引用丢失信息")]
     public static void FindAllShaderMissing()
     {
         List<string> shaderList = new List<string>() { "*.shader.meta" };
@@ -51,7 +51,7 @@ public class CheckMissing
         }
     }
 
-    [MenuItem("Assets/引用检查/列出脚本引用丢失信息")]
+    [MenuItem("Assets/程序专用/引用检查/列出脚本引用丢失信息")]
     public static void FindSelectedScriptMissing()
     {
         string path;
@@ -67,7 +67,7 @@ public class CheckMissing
         DoFindScriptMissing(path, guidSet);
     }
 
-    [MenuItem("Assets/引用检查/列出材质引用丢失信息")]
+    [MenuItem("Assets/程序专用/引用检查/列出材质引用丢失信息")]
     public static void FindSelectedMatMissing()
     {
         string path;
@@ -83,7 +83,7 @@ public class CheckMissing
         DoFindMatMissing(path, guidSet);
     }
 
-    [MenuItem("Assets/引用检查/列出Shader引用丢失信息")]
+    [MenuItem("Assets/程序专用/引用检查/列出Shader引用丢失信息")]
     public static void FindSelectedShaderMissing()
     {
         string path;
@@ -173,7 +173,7 @@ public class CheckMissing
         return legal;
     }
 
-    private static string[] GetFiles(string path, string pattern)
+    public static string[] GetFiles(string path, string pattern)
     {
         if (File.Exists(path))
         {
