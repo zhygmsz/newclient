@@ -24,13 +24,13 @@ public class EditorUtils
 
     private static void LogUIPanel(Transform root, string path)
     {
+        UIPanel panel = root.GetComponent<UIPanel>();
+        if (panel != null)
+        {
+            Debug.LogError(path);
+        }
         foreach (Transform trs in root)
         {
-            UIPanel panel = trs.GetComponent<UIPanel>();
-            if (panel != null)
-            {
-                Debug.LogError(path + "/" + trs.name);
-            }
             LogUIPanel(trs, path + "/" + trs.name);
         }
     }
