@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+//工作机和mac的unity版本不一致，导致serializedVersion不一致，总是红色，等到版本一致后，再放开该设置脚本
 
+/*
 public class AssetImportProcessor : AssetPostprocessor
 {
 	void OnPostprocessTexture(Texture2D texture)
@@ -25,3 +27,4 @@ public class AssetImportProcessor : AssetPostprocessor
         }
 	}
 }
+*/

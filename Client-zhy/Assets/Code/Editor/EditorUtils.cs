@@ -47,7 +47,8 @@ public class EditorUtils
             {
                 AssetDatabase.ImportAsset(path);
             }
-            //EditorUtility.DisplayProgressBar("请稍后", "重设UI图片资源格式", (idx + 1) / len);
+            EditorUtility.DisplayProgressBar("重设UI图片资源格式", path, (idx + 1.0f) / len);
         }
+        EditorUtility.ClearProgressBar();
     }
 }
