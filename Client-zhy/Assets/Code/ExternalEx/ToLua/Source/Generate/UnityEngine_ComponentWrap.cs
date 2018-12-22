@@ -437,7 +437,7 @@ public class UnityEngine_ComponentWrap
 			o = ToLua.ToObject(L, 1);
 			UnityEngine.Component obj = (UnityEngine.Component)o;
 			UnityEngine.Transform ret = obj.transform;
-			ToLua.PushSealed(L, ret);
+			ToLua.Push(L, ret);
 			return 1;
 		}
 		catch(Exception e)

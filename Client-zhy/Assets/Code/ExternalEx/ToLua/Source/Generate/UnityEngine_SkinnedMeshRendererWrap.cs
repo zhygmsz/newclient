@@ -166,7 +166,7 @@ public class UnityEngine_SkinnedMeshRendererWrap
 			o = ToLua.ToObject(L, 1);
 			UnityEngine.SkinnedMeshRenderer obj = (UnityEngine.SkinnedMeshRenderer)o;
 			UnityEngine.Transform ret = obj.rootBone;
-			ToLua.PushSealed(L, ret);
+			ToLua.Push(L, ret);
 			return 1;
 		}
 		catch(Exception e)
@@ -298,7 +298,7 @@ public class UnityEngine_SkinnedMeshRendererWrap
 		{
 			o = ToLua.ToObject(L, 1);
 			UnityEngine.SkinnedMeshRenderer obj = (UnityEngine.SkinnedMeshRenderer)o;
-			UnityEngine.Transform arg0 = (UnityEngine.Transform)ToLua.CheckObject(L, 2, typeof(UnityEngine.Transform));
+			UnityEngine.Transform arg0 = (UnityEngine.Transform)ToLua.CheckObject<UnityEngine.Transform>(L, 2);
 			obj.rootBone = arg0;
 			return 0;
 		}

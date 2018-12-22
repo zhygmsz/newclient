@@ -341,7 +341,7 @@ public class GameCore_UIMgrWrap
 	{
 		try
 		{
-			ToLua.PushSealed(L, GameCore.UIMgr.UIRootTrsansform);
+			ToLua.Push(L, GameCore.UIMgr.UIRootTrsansform);
 			return 1;
 		}
 		catch (Exception e)
