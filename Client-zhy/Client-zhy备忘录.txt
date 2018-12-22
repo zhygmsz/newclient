@@ -16,7 +16,6 @@ NGUI字体加粗bug改良，仔细看uilabel组件
 
 
 tolua细节
-记录今天看的tolua在C#与C之间传递字符串时候的细节，从C#到C到Lua的过程，以及反过来。utf-16与utf-8的转换工作并不在tolua里，在.net平台底层
 实地跟gameObject.transform.localPosition = pos这句代码的流程，开启tolua，并完善深入浅出tolua文档
 一个lua层的function传到C#层，LuaFunction.cs是如何起到桥接作用的
 测试直接将lua层的function赋值给C#层的委托，每次执行该委托时，是否会每次都创建一个tolua的委托对象

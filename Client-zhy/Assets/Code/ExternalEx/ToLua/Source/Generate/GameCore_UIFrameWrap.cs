@@ -85,7 +85,7 @@ public class GameCore_UIFrameWrap
 			GameCore.UIFrame obj = (GameCore.UIFrame)ToLua.CheckObject<GameCore.UIFrame>(L, 1);
 			string arg0 = ToLua.CheckString(L, 2);
 			UnityEngine.Transform o = obj.Find(arg0);
-			ToLua.PushSealed(L, o);
+			ToLua.Push(L, o);
 			return 1;
 		}
 		catch (Exception e)
@@ -120,11 +120,11 @@ public class GameCore_UIFrameWrap
 		{
 			ToLua.CheckArgsCount(L, 4);
 			GameCore.UIFrame obj = (GameCore.UIFrame)ToLua.CheckObject<GameCore.UIFrame>(L, 1);
-			UnityEngine.Transform arg0 = (UnityEngine.Transform)ToLua.CheckObject(L, 2, typeof(UnityEngine.Transform));
-			UnityEngine.Transform arg1 = (UnityEngine.Transform)ToLua.CheckObject(L, 3, typeof(UnityEngine.Transform));
+			UnityEngine.Transform arg0 = (UnityEngine.Transform)ToLua.CheckObject<UnityEngine.Transform>(L, 2);
+			UnityEngine.Transform arg1 = (UnityEngine.Transform)ToLua.CheckObject<UnityEngine.Transform>(L, 3);
 			int arg2 = (int)LuaDLL.luaL_checknumber(L, 4);
 			UnityEngine.Transform o = obj.DuplicateAndAdd(arg0, arg1, arg2);
-			ToLua.PushSealed(L, o);
+			ToLua.Push(L, o);
 			return 1;
 		}
 		catch (Exception e)

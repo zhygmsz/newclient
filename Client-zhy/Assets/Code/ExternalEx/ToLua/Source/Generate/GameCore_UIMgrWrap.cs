@@ -25,6 +25,7 @@ public class GameCore_UIMgrWrap
 		L.RegFunction("OnDragOut", OnDragOut);
 		L.RegFunction("New", _CreateGameCore_UIMgr);
 		L.RegFunction("__tostring", ToLua.op_ToString);
+		L.RegVar("UIRootTrsansform", get_UIRootTrsansform, null);
 		L.EndClass();
 	}
 
@@ -328,6 +329,20 @@ public class GameCore_UIMgrWrap
 			int arg2 = (int)LuaDLL.luaL_checknumber(L, 3);
 			GameCore.UIMgr.OnDragOut(arg0, arg1, arg2);
 			return 0;
+		}
+		catch (Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int get_UIRootTrsansform(IntPtr L)
+	{
+		try
+		{
+			ToLua.Push(L, GameCore.UIMgr.UIRootTrsansform);
+			return 1;
 		}
 		catch (Exception e)
 		{

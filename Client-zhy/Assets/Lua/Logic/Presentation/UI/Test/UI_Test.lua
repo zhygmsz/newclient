@@ -1,14 +1,24 @@
 module("UI_Test", package.seeall)
 
+local mSelf
+
+local mSp1Trs
+
 function OnCreate(self)
     GameLog.Log("---------------------OnCreate")
+    mSp1Trs = self:Find("sp11111")
+    local sp1Go = mSp1Trs.gameObject
+    GameLog.LogError("sp1Go name = %s", sp1Go.name)
 end
 
 function OnEnable(self, myName, herName)
     GameLog.Log("---------------------OnEnable")
-    GameLog.LogError(myName)
-    GameLog.LogError(herName)
-    local val = 1
+    if myName then
+        GameLog.LogError(myName)
+    end
+    if herName then
+        GameLog.LogError(herName)
+    end
 end
 
 function OnDisable(self)

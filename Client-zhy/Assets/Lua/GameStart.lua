@@ -47,13 +47,15 @@ end
 
 function Test()
 	--打开第一个UI，测试UI框架
-	UIMgr.ShowUI(AllUI.UI_Test, Func1, nil, true, "赵昊杨", "song")
-	--UIMgr.ShowUI(AllUI.UI_Chat_Main)
+	UIMgr.ShowUI(AllUI.UI_Test)
+	--UIMgr.ShowUI(AllUI.UI_Test, Func1, nil, true, "赵昊杨", "song")
 
 	--测试require和module
+	--[[
 	local test1 = require("Common/Test1")
 	local val = _G["Test1"];
 	local val2 = package.loaded["Test1"];
 	local test2 = require("Common/Test2")
 	local val3 = "zhaohaoyang"
+	--]]
 end
